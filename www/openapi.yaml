@@ -1,0 +1,213 @@
+openapi: 3.0.0
+info:
+  version: 0.0.1
+  title: MX HTTP Proxy API
+  description: |
+    Выполнение команд через REST API на сервере [Zultys MX](https://www.zultys.com/zultys-cloud-services/).
+    Для отслеживания событий на сервере Zultys MX используются [Server-Sent Events API](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
+
+    # Errors
+    Для возврата кода ошибки используются стандартные коды возврата HTTP:
+
+    | Код   | Описание                                          |
+    |-------|---------------------------------------------------|
+    | `400` | ошибка разбора параметров запроса                 |
+    | `401` | требуется токен с сессией                         |
+    | `403` | сессия больше не действительна                    |
+    | `404` | команда не поддерживается                         |
+    | `415` | неподдерживаемый тип данных                       |
+    | `500` | ошибка сервера MX                                 |
+    | `502` | сервер MX недоступен или не отвечает на запросы   |
+    | `504` | превышено время ожидания ответа от сервера MX     |
+
+    Описание ошибки отдается в виде ответа:
+
+        {
+          "error": "MX response timeout"
+        }
+
+    В том случае, когда команда успешно выполнена, но не содержит данных для возврата,
+    используется код окончания `204`.
+    
+  license:
+    name: MIT
+servers:
+  - url: /
+security:
+  - SessionToken: []
+
+paths:
+  /login:
+    post:
+      operationId: Login
+      tags: [Authorization]
+      description: >-
+        Осуществляет подключение к серверу MX и авторизует пользователя.
+        В ответ возвращается информация об авторизованном пользователе и токен авторизации сессии,
+        который необходимо использовать в заголовке авторизации во всех остальных запросах.
+      security: []
+      requestBody:
+        description: параметры для авторизации пользователя на сервер MX
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: информация для авторизации соединения
+              required:
+                - login
+                - password
+              properties:
+                login:
+                  type: string
+                  description: логин пользователя
+                password:
+                  type: string
+                  format: password
+                  description: пароль для авторизации
+                type:
+                  type: string
+                  enum: [User, Server]
+                  description: тип авторизации
+                platform:
+                  type: string
+                  example: iPhone
+                  description: название платформы
+                version:
+                  type: string
+                  example: '7.0'
+                  description: версия платформы
+                clientType:
+                  type: string
+                  enum: [Mobile, Desktop, CRM]
+                  description: тип клиента
+                serverType:
+                  type: string
+                  enum: [SMS]
+                  description: тип сервера
+                loginCapab:
+                  type: string
+                  example: Audio|Video|Im|911Support|BinIm|WebChat
+                  description: дополнительные параметры авторизации
+                mediaCapab:
+                  type: string
+                  example: Voicemail|Fax|CallRec
+                  description: дополнительные параметры поддержки данных
+                abNotify:
+                  type: boolean
+                  description: уведомлять об изменении адресной книги
+                forced:
+                  type: boolean
+                  description: завершить все другие сессии данного пользователя
+                apiVersion:
+                  type: integer
+                  format: int32
+                  description: поддерживаемая версия MX API
+                  example: 11
+              example:
+                login: mxtest
+                password: mx_password
+                type: User
+                platform: iPhone
+                version: '7.0'
+      responses:
+        '200':
+          description: возвращает токен сессии и информацию об авторизованном пользователе
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token, api, mx]
+                properties:
+                  token:
+                    type: string
+                    description: токен с сессией
+                    example: yGuVWEnStvR3kC8P
+                  user:
+                    type: string
+                    description: уникальный идентификатор пользователя MX
+                    example: '43892780091502529'
+                  device:
+                    type: string
+                    description: внутренний номер пользователя MX
+                    example: '271'
+                  softPhonePwd:
+                    type: string
+                    description: пароль для авторизации SIP
+                    example: Pf3Hs4lLcWRpkYRK4MMbBQ1ZF1gI0WDX
+                  api:
+                    type: integer
+                    format: int32
+                    description: серверная версия MX API
+                    example: 11
+                  mx:
+                    type: string
+                    description: уникальный идентификатор MX
+                    example: 631HC
+                  maxMsgFileSizeMb:
+                    type: integer
+                    format: int32
+                    description: максимально допустимый размер сообщения в мегабайтах
+                  capab:
+                    type: string
+                    description: поддерживаемые дополнительные опции сервера
+                example:
+                  token: PGg_bXw8TdBKpSVX
+                  sn: 631HC
+                  apiVersion: 12
+                  ext: '273'
+                  jid: '43892780322813134'
+                  softPhonePwd: lefIQ43upsZ4dSJ9saGzA5rkAcF2WBJl
+        default:
+          $ref: '#/components/responses/error'
+  /logout:
+    post:
+      operationId: Logout
+      tags: [Authorization]
+      description: >-
+        Завершает сессию и отключается от сервера MX. Авторизационный токен после 
+        этого становится недействительным.
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+
+components:
+  securitySchemes:
+    SessionToken:
+      type: http
+      scheme: bearer
+      description: |
+        Токен сессии возвращается при авторизации пользователя ([`/login`](#operation/Login)) 
+        и действителен до тех пор, пока сервер поддерживает соединение с MX или не выполнена команда 
+        [`/logout`](#operation/Logout). После этого необходимо заново авторизоваться и получать новый токен с 
+        идентификатором сесии.
+
+        Данный токен необходимо использовать для все запросов API, кроме непосредственно
+        запроса авторизации:
+
+            Authorization: Bearer LRSO4vGDdyLA6UQl
+
+        В качестве альтернативы, токен авторизации можно передавать не в заголовке, а
+        в виде параметра запроса `?access_token=...`. Данный подход можно использовать,
+        например, при создании запроса на получение событий сервера MX с помощью 
+        [HTTP Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
+
+  responses:
+    '204':
+      description: успешное выполнение команды
+    error: 
+      description: ошибка выполнения команды
+      content:
+        application/json:
+          schema:
+            description: формат возвращаемой ошибки
+            type: object
+            required:
+              - error
+            properties:
+              error:
+                type: string
+                description: описание ошибки
+                example: MX error
