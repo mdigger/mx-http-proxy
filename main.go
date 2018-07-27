@@ -1,15 +1,22 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
+	"errors"
 	"flag"
 	"fmt"
 	"net"
+	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"strings"
 	"time"
 
-	"gopkg.in/mdigger/log.v4"
+	"github.com/mdigger/rest"
+	"github.com/mdigger/log"
+	"golang.org/x/crypto/acme/autocert"
 	"gopkg.in/mdigger/mx.v2"
 )
 
@@ -86,4 +93,64 @@ func main() {
 
 	// настраиваем вывод лога MX
 	mx.Logger = log.StdLog(log.TRACE, "mx")
+
+	// инициализируем обработку HTTP запросов
+	var mux = &rest.ServeMux{
+		Headers: map[string]string{"Server": agent},
+		Logger:  log.New("http"),
+	}
+
+	// инициализируем и запускаем сервер HTTP
+	var server = http.Server{
+		Addr:              host,
+		Handler:           mux,
+		IdleTimeout:       10 * time.Minute,
+		ReadHeaderTimeout: 5 * time.Second,
+		ErrorLog:          mux.Logger.StdLog(log.ERROR),
+	}
+	// добавляем автоматическую поддержку TLS сертификатов для сервиса
+	if ssl {
+		var manager = autocert.Manager{
+			Prompt: autocert.AcceptTOS,
+			HostPolicy: func(_ context.Context, host string) error {
+				if host != hostname {
+					mux.Logger.Error("unsupported https host", "host", host)
+					return errors.New("acme/autocert: host not configured")
+				}
+				return nil
+			},
+			Email: "dmitrys@xyzrd.com",
+			Cache: autocert.DirCache("letsEncrypt.cache"),
+		}
+		server.TLSConfig = &tls.Config{
+			GetCertificate: manager.GetCertificate,
+		}
+		server.Addr = ":https"
+		// поддержка получения сертификата Let's Encrypt и редирект на HTTPS
+		go http.ListenAndServe(":http", manager.HTTPHandler(nil))
+	}
+	mux.Logger.Info("server",
+		"listen", server.Addr, "tls", ssl, "url", serverURL.String())
+
+	// отслеживаем сигнал о прерывании и останавливаем по нему сервер
+	go func() {
+		var sigint = make(chan os.Signal, 1)
+		signal.Notify(sigint, os.Interrupt)
+		<-sigint
+		if err := server.Shutdown(context.Background()); err != nil {
+			mux.Logger.Error("server shutdown", err)
+		}
+	}()
+
+	// запускаем веб-сервер
+	if ssl {
+		err = server.ListenAndServeTLS("", "")
+	} else {
+		err = server.ListenAndServe()
+	}
+	if err != http.ErrServerClosed {
+		mux.Logger.Error("server", err)
+	} else {
+		mux.Logger.Info("server stopped")
+	}
 }
