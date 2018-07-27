@@ -1,0 +1,13 @@
+github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
+github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORNo=
+github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
+github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
+github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/mdigger/errors v0.0.0-20170930211353-54cbf1b34208 h1:dA3HtUZtcFxWYa5fpPoX2Ez54aDNFMrcOK8Iv2cq9jg=
+github.com/mdigger/errors v0.0.0-20170930211353-54cbf1b34208/go.mod h1:/GnGIqhKjgxOaeey7rVx3ZQJmYxKNZBBYArj3LBD2xk=
+github.com/mdigger/log v0.0.0-20180726173735-1d5a322ea881 h1:If6E7I3DFvJbl6FYhzg3m3/VcKFqIqbrkAFVZVPUeQw=
+github.com/mdigger/log v0.0.0-20180726173735-1d5a322ea881/go.mod h1:6yOXG9bpHAXDdWdlK2nsdRMZBjV2Aw0SkIFpqLlQ3W0=
+gopkg.in/mdigger/log.v4 v4.0.0-20180726173735-1d5a322ea881 h1:ewOXk3MbhXF3x6xYsKmKQtRL7SK2y4AND2qBxib/Duk=
+gopkg.in/mdigger/log.v4 v4.0.0-20180726173735-1d5a322ea881/go.mod h1:PfcsrE1RhPH6cCzNhKx55eBlbWCdzejB+f6aJdErpqU=
+gopkg.in/mdigger/mx.v2 v2.0.0-20180805033950-b690de7ae074 h1:n3aCJfLZjoPr4BeN2sOT49JJAbarAnD1gV0zI6dwOU0=
+gopkg.in/mdigger/mx.v2 v2.0.0-20180805033950-b690de7ae074/go.mod h1:isark1raypml+yMm7sxCPHnWa22THVPRvP3dyTms+1Y=
