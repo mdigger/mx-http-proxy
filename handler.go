@@ -3,6 +3,9 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
+	"fmt"
+	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/mdigger/log"
@@ -72,4 +75,42 @@ func (l *Conns) Login(c *rest.Context) error {
 		Token: token,
 		Info:  conn.Info,
 	})
+}
+
+// authorize авторизует запрос и возвращает информацию о соединении.
+func (l *Conns) authorize(c *rest.Context) (*Conn, *rest.Error) {
+	const authMethodName = "Bearer "
+	// запрашивает токен авторизации из заголовка или параметра запроса
+	var token = c.Header("Authorization")
+	if strings.HasPrefix(token, authMethodName) {
+		token = strings.TrimPrefix(token, authMethodName)
+	} else {
+		token = c.Query("access_token")
+	}
+	if token == "" {
+		c.SetHeader("WWW-Authenticate", fmt.Sprintf("Token realm=%q", appName))
+		return nil, rest.ErrUnauthorized
+	}
+	c.SetData("token", token) // сохраняем токен в контексте запроса
+	// получаем соединение по токену
+	mxconn, ok := l.list.Load(token)
+	if !ok {
+		return nil, rest.NewError(http.StatusForbidden, "Connection token not valid")
+	}
+	var conn = mxconn.(*Conn)
+	c.AddLogField("user", conn.login.UserName)
+	return conn, nil
+}
+
+// Logout завершает сессию и удаляет ее из списка.
+func (l *Conns) Logout(c *rest.Context) error {
+	// получаем соединение из списка по авторизационному токену
+	conn, err := l.authorize(c)
+	if err != nil {
+		return err
+	}
+	conn.Send("<logout/>", nil) // деавторизуем пользователя
+	// после закрытия соединения оно само удалится из списка активных
+	conn.Close() // закрываем соединение
+	return nil   // ответ не требуется
 }
