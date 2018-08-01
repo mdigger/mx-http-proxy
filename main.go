@@ -14,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mdigger/rest"
 	"github.com/mdigger/log"
+	"github.com/mdigger/rest"
 	"golang.org/x/crypto/acme/autocert"
 	"gopkg.in/mdigger/mx.v2"
 )
@@ -93,12 +93,16 @@ func main() {
 
 	// настраиваем вывод лога MX
 	mx.Logger = log.StdLog(log.TRACE, "mx")
+	var conns = new(Conns) // инициализируем список подключений к MX
+	defer conns.Close()    // закрываем все соединения по окончании
 
 	// инициализируем обработку HTTP запросов
 	var mux = &rest.ServeMux{
 		Headers: map[string]string{"Server": agent},
 		Logger:  log.New("http"),
 	}
+	// обработчики команд
+	mux.Handle("POST", "/login", conns.Login)
 
 	// инициализируем и запускаем сервер HTTP
 	var server = http.Server{

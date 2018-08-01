@@ -6,6 +6,8 @@ import (
 	"sync"
 
 	"github.com/mdigger/log"
+	"github.com/mdigger/rest"
+	"gopkg.in/mdigger/mx.v2"
 )
 
 // Conns описывает список подключений к серверам MX.
@@ -46,4 +48,28 @@ func (l *Conns) Store(conn *Conn) string {
 		l.Delete(token)
 	})
 	return token
+}
+
+// Login обрабатывает авторизацю соединения.
+func (l *Conns) Login(c *rest.Context) error {
+	// разбираем параметры логина
+	var login = new(mx.Login)
+	if err := jsonBind(c.Request, login); err != nil {
+		return err
+	}
+	c.AddLogField("user", login.UserName)
+	// подключаемся к серверу и авторизуем пользователя
+	conn, err := Connect(MXHost, *login)
+	if err != nil {
+		return httpError(err)
+	}
+	// сохраняем подключение в списке и отдаем токен в ответ
+	var token = l.Store(conn)
+	return c.Write(&struct {
+		Token string `json:"token,omitempty"`
+		mx.Info
+	}{
+		Token: token,
+		Info:  conn.Info,
+	})
 }
