@@ -173,6 +173,94 @@ paths:
         default:
           $ref: '#/components/responses/error'
 
+  /startMonitor:
+    post:
+      operationId: StartMonitor
+      tags: [Events]
+      description: >-
+        Запуск серверного монитора позволяет отслеживать события о звонках.
+        Так же без запущенного монитора недоступны многие операции. Например,
+        работа с голосовой почтой.
+      requestBody:
+        description: параметры для запуска монитора
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              description: параметры запуска монитора
+              required: [device]
+              properties:
+                device:
+                  type: string
+                  description: идентификатор устройства
+                conf:
+                  type: boolean
+                  description: отслеживать события конференции
+              example:
+                device: '199'
+      responses:
+        '200':
+          description: возвращает информацию о запущенном мониторе
+          content:
+            application/json:
+              schema:
+                type: object
+                description: информация о запущенном мониторе
+                required: [monitor]
+                properties:
+                  monitor:
+                    type: integer
+                    description: идентификатор монитора
+                example:
+                  monitor: 1
+        default:
+          $ref: '#/components/responses/error'
+  /stopMonitor:
+    post:
+      operationId: StopMonitor
+      tags: [Events]
+      description: Останавливает ранее запущенный серверный монитор
+      requestBody:
+        description: параметры для остановки монитора
+        content:
+            application/json:
+              schema:
+                type: object
+                description: параметры для остановки ранее запущенного монитора
+                required: [monitor]
+                properties:
+                  monitor:
+                    type: integer
+                    description: идентификатор монитора
+                example:
+                  monitor: 1
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /startMonitorAb:
+    post:
+      operationId: StartMonitorAb
+      tags: [Events]
+      description: Запускает мониторинг изменений адресной книги
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /stopMonitorAb:
+    post:
+      operationId: StopMonitorAb
+      tags: [Events]
+      description: Останавливает мониторинг изменений адресной книги
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+
 components:
   securitySchemes:
     SessionToken:
