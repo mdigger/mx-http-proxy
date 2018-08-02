@@ -114,3 +114,50 @@ func (l *Conns) Logout(c *rest.Context) error {
 	conn.Close() // закрываем соединение
 	return nil   // ответ не требуется
 }
+
+// Commands обрабатывает команды к серверу MX.
+func (l *Conns) Commands(c *rest.Context) error {
+	// авторизуемся и получаем соединение из списка
+	conn, err := l.authorize(c)
+	if err != nil {
+		return err
+	}
+	// формируем команду для сервера MX и структуру для разбора ответа
+	var cmd, resp interface{}
+	switch methodName := c.Param("cmd"); methodName {
+	case "monitorStart":
+		cmd = new(MonitorStartRequest)
+		resp = new(MonitorStartResponse)
+	case "monitorStop":
+		cmd = new(MonitorStopRequest)
+		resp = new(NamedResponse)
+	case "monitorStartAb":
+		cmd = new(MonitorStartAbRequest)
+		resp = new(NamedResponse)
+	case "monitorStopAb":
+		cmd = new(MonitorStopAbRequest)
+		resp = new(NamedResponse)
+
+	default:
+		return c.Error(http.StatusNotFound,
+			fmt.Sprintf("Unsupported command %q", methodName))
+	}
+
+	// разбираем параметры и формируем команду
+	if err := jsonBind(c.Request, cmd); err != nil {
+		return err
+	}
+	// отсылаем команду на сервер
+	if err := conn.Send(cmd, resp); err != nil {
+		return httpError(err)
+	}
+
+	// обрабатываем ответ от сервера MX
+	switch obj := resp.(type) {
+	case *NamedResponse:
+		resp = nil // для пустого ответа ничего не возвращаем
+		_ = obj
+	}
+
+	return c.Write(resp) // возвращаем ответ
+}

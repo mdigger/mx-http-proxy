@@ -104,6 +104,7 @@ func main() {
 	// обработчики команд
 	mux.Handle("POST", "/login", conns.Login)
 	mux.Handle("POST", "/logout", conns.Logout)
+	mux.Handle("POST", "/:cmd", conns.Commands)
 
 	// инициализируем и запускаем сервер HTTP
 	var server = http.Server{
