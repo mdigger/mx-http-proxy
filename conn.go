@@ -26,7 +26,7 @@ func Connect(host string, login mx.Login) (*Conn, error) {
 		login: login,
 		sse:   sse.New(), // инициализируем брокера для отправики событий
 	}
-	// go mxconn.reading() // запускаем обработчик входящих событий от сервера MX
+	go mxconn.reading() // запускаем обработчик входящих событий от сервера MX
 	return mxconn, nil
 }
 

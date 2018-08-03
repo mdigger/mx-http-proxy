@@ -164,3 +164,19 @@ func (l *Conns) Commands(c *rest.Context) error {
 
 	return c.Write(resp) // возвращаем ответ
 }
+
+// Events позволяет получать события от сервера MX.
+func (l *Conns) Events(c *rest.Context) error {
+	conn, err := l.authorize(c)
+	if err != nil {
+		return err
+	}
+	log.Debug("sse connect",
+		"user", conn.login.UserName,
+		"count", conn.sse.Connected()+1)
+	conn.sse.ServeHTTP(c.Response, c.Request)
+	log.Debug("sse disconnect",
+		"user", conn.login.UserName,
+		"count", conn.sse.Connected())
+	return nil
+}
