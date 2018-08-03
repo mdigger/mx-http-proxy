@@ -48,6 +48,9 @@ func (l *Conns) Store(conn *Conn) string {
 	l.list.Store(token, conn) // сохраняем соединение в списке
 	// при закрытии соединения автоматически удалить из списка
 	conn.SetCloser(func(err error) {
+		if err != nil {
+			conn.sse.Data("error", err.Error(), "")
+		}
 		l.Delete(token)
 	})
 	return token
