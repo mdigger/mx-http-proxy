@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/xml"
 
-	"github.com/mdigger/mx.v2"
+	"gopkg.in/mdigger/mx.v2"
 )
 
 type (
