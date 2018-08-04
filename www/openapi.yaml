@@ -261,6 +261,684 @@ paths:
         default:
           $ref: '#/components/responses/error'
 
+  /events:
+    post:
+      operationId: Events
+      tags: [Events]
+      description: | 
+        Отдает информацию о серверных событиях в формате 
+        [Server-Sent Events](//developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
+      responses:
+        '200':
+          description: возвращает информацию о серверных событиях
+          content:
+            text/event-stream:
+              schema:
+                anyOf:
+                  - title: presence
+                    type: object
+                    description: presence
+                    properties:
+                      user:
+                        type: string
+                        description: from
+                      status:
+                        type: string
+                        description: mxStatus
+                      presence:
+                        type: string
+                        description: presence
+                      note:
+                        type: string
+                        description: presenceNote
+                    example:
+                      user: '44007001373183196'
+                      presence: Available
+                      status: USER_HAS_RINGING_CALL|USER_ON_CALL_NO_MORE_LINES
+                      note: sample
+                  - title: message
+                    type: object
+                    description: messageHist & message
+                    required: [id, from, to]
+                    properties:
+                      id:
+                        type: integer
+                        format: int32
+                        description: msgId
+                      gid:
+                        type: integer
+                        description: persistId
+                      new:
+                        type: boolean
+                        description: флаг, что сообщение не из истории
+                        default: true
+                      from:
+                        type: string
+                        description: from
+                        example: '43892780838802510'
+                      fromName:
+                        type: string
+                        description: name
+                      to:
+                        type: string
+                        description: toRecipId
+                        example: '43892780838802510'
+                      toName:
+                        type: string
+                        description: toRecipName
+                      group:
+                        type: string
+                        description: groupId
+                        example: '43892780838802510'
+                      did:
+                        type: string
+                        description: did
+                      req:
+                        type: integer
+                        description: reqId
+                      delivered:
+                        type: boolean
+                        description: delivered
+                      seen:
+                        type: boolean
+                        description: seen
+                      recipType:
+                        type: string
+                        description: recipType
+                        enum: [User, Server, Group]
+                      type:
+                        type: string
+                        description: packetType
+                        enum: [Text, Binary, Conf]
+                      timestamp:
+                        type: integer
+                        format: date-time
+                        description: timestamp
+                      finished:
+                        type: boolean
+                        description: finished
+                      contentState:
+                        type: string
+                        description: contentState
+                      contentSize:
+                        type: integer
+                        format: int32
+                        description: contentSize
+                  - title: messageHist
+                    type: object
+                    description: messageHist & message
+                    required: [id, from, to]
+                    properties:
+                      id:
+                        type: integer
+                        format: int32
+                        description: msgId
+                      gid:
+                        type: integer
+                        description: persistId
+                      new:
+                        type: boolean
+                        description: флаг, что сообщение не из истории
+                        default: false
+                      from:
+                        type: string
+                        description: from
+                        example: '43892780838802510'
+                      fromName:
+                        type: string
+                        description: name
+                      to:
+                        type: string
+                        description: toRecipId
+                        example: '43892780838802510'
+                      toName:
+                        type: string
+                        description: toRecipName
+                      group:
+                        type: string
+                        description: groupId
+                        example: '43892780838802510'
+                      did:
+                        type: string
+                        description: did
+                      req:
+                        type: integer
+                        description: reqId
+                      delivered:
+                        type: boolean
+                        description: delivered
+                      seen:
+                        type: boolean
+                        description: seen
+                      recipType:
+                        type: string
+                        description: recipType
+                        enum: [User, Server, Group]
+                      type:
+                        type: string
+                        description: packetType
+                        enum: [Text, Binary, Conf]
+                      timestamp:
+                        type: integer
+                        format: date-time
+                        description: timestamp
+                      finished:
+                        type: boolean
+                        description: finished
+                      contentState:
+                        type: string
+                        description: contentState
+                      contentSize:
+                        type: integer
+                        format: int32
+                        description: contentSize
+                  - title: DivertedEvent
+                    type: object
+                    description: >-
+                      DivertedEvent indicates that a call has been diverted from a
+                      device and that the call is no longer present at the device.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      diverting:
+                        type: string
+                        description: divertingDevice>deviceIdentifier
+                      to:
+                        type: string
+                        description: newDestination>deviceIdentifier
+                      cause:
+                        type: string
+                        description: cause
+                      allowed:
+                        type: integer
+                        format: int32
+                        description: cmdsAllowed
+                      flags:
+                        type: integer
+                        description: callTypeFlags
+                    example:
+                      monitor: 1
+                      call:
+                        id: 351
+                        device: '199'
+                      diverting: '199'
+                      to: '199'
+                      cause: normal
+                      allowed: 272
+                      flags: 137363459
+                  - title: DeliveredEvent
+                    type: object
+                    description: >-
+                        DeliveredEvent indicates that a call is being presented
+                        to a device in either the Ringing or Entering distribution
+                        modes of the alerting state.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      alerting:
+                        type: string
+                        description: alertingDevice>deviceIdentifier
+                      alertingName:
+                        type: string
+                        description: alertingDisplayName
+                      networkCalling:
+                        type: string
+                        description: networkCallingDevice>deviceIdentifier
+                      calling:
+                        type: string
+                        description: callingDevice>deviceIdentifier
+                      callingName:
+                        type: string
+                        description: callingDisplayName
+                      called:
+                        type: string
+                        description: calledDevice>deviceIdentifier
+                      lastRedirection:
+                        type: string
+                        description: lastRedirectionDevice>deviceIdentifier
+                      localConnection:
+                        type: string
+                        description: localConnectionInfo
+                      cause:
+                        type: string
+                        description: cause
+                      allowed:
+                        type: integer
+                        format: int32
+                        description: cmdsAllowed
+                      flags:
+                        type: integer
+                        format: int32
+                        description: callTypeFlags
+                      cads:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Cad'
+                    example:
+                      monitor: 1
+                      call:
+                        id: 351
+                        device: '199'
+                        global: '2809269720623105293'
+                      alerting: '*86'
+                      alertingName: voicemail
+                      networkCalling: Vasily Znamensky
+                      calling: '192'
+                      callingName: Vasily Znamensky
+                      called: '*86'
+                      lastRedirection: ''
+                      localConnection: alerting
+                      cause: normal
+                      flags: 3145736
+                      cads:
+                        - name: __FIRST_CALL_ID__
+                          type: string
+                          value: 631UN-B5-00004-50E
+                  - title: EstablishedEvent
+                    type: object
+                    description: >-
+                      EstablishedEvent indicates that a call has been answered
+                      at a device or that a call has been connected to a device.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      answering:
+                        type: string
+                        description: answeringDevice>deviceIdentifier
+                      answeringName:
+                        type: string
+                        description: answeringDisplayName
+                      calling:
+                        type: string
+                        description: callingDevice>deviceIdentifier
+                      callingName:
+                        type: string
+                        description: callingDisplayName
+                      called:
+                        type: string
+                        description: calledDevice>deviceIdentifier
+                      lastRedirection:
+                        type: string
+                        description: lastRedirectionDevice>deviceIdentifier
+                      cause:
+                        type: string
+                        description: cause
+                      allowed:
+                        type: integer
+                        format: int32
+                        description: cmdsAllowed
+                      flags:
+                        type: integer
+                        format: int32
+                        description: callTypeFlags
+                      cads:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Cad'
+                    example:
+                      monitor: 1
+                      call:
+                        id: 5
+                        device: '199'
+                        global: '2809269720623105284'
+                      answering: '199'
+                      answeringName: Maxim Donchenko
+                      calling: '192'
+                      callingName: Vasily Znamensky
+                      called: '*86'
+                      calledName: voicemail
+                      lastRedirection: ''
+                      cause: normal
+                      flags: 137371651
+                      cads:
+                        - name: __FIRST_CALL_ID__
+                          type: string
+                          value: 631UN-B5-00004-504
+                  - title: HeldEvent
+                    type: object
+                    description: HeldEvent indicates that a call has been placed on hold.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      holding:
+                        type: string
+                        description: holdingDevice>deviceIdentifier
+                      localConnection:
+                        type: string
+                        description: localConnectionInfo
+                      cause:
+                        type: string
+                        description: cause
+                      allowed:
+                        type: integer
+                        format: int32
+                        description: cmdsAllowed
+                      flags:
+                        type: integer
+                        format: int32
+                        description: callTypeFlags
+                    example:
+                      monitor: 1
+                      call:
+                        id: 56
+                        device: '199'
+                      holding: '199'
+                      cause: normal
+                      allowed: 376
+                      flags: 141565955
+                  - title: RecordingStateEvent
+                    type: object
+                    description: RecordingStateEvent
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      available:
+                        type: boolean
+                        description: RecIsAvailable
+                      active:
+                        type: boolean
+                        description: RecIsActive
+                    example:
+                      monitor: 1
+                      call:
+                        id: 18
+                        device: '199'
+                      available: true
+                      active: false
+                  - title: ServiceInitiatedEvent
+                    type: object
+                    description: >-
+                      ServiceInitiatedEvent indicates that a telephony service has been
+                      initiated at a monitored device.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      initiating:
+                        type: string
+                        description: initiatingDevice>deviceIdentifier
+                      localConnection:
+                        type: string
+                        description: localConnectionInfo
+                      cause:
+                        type: string
+                        description: cause
+                    example:
+                      monitor: 1
+                      call:
+                        id: 56
+                        device: '199'
+                      localConnection: initializing
+                      initiating: '199'
+                      cause: normal
+                  - title: ConnectionClearedEvent
+                    type: object
+                    description: >-
+                      ConnectionClearedEvent indicates that a call has been cleared and no
+                      longer exists.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      releasing:
+                        type: string
+                        description: releasingDevice>deviceIdentifier
+                      cause:
+                        type: string
+                        description: cause
+                    example:
+                      monitor: 1
+                      call:
+                        id: 56
+                        device: '199'
+                      releasing: '199'
+                      cause: normal
+                  - title: OriginatedEvent
+                    type: object
+                    description: >-
+                      OriginatedEvent indicates that a call is being attempted
+                      from a device.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      calling:
+                        type: string
+                        description: callingDevice>deviceIdentifier
+                      called:
+                        type: string
+                        description: calledDevice>deviceIdentifier
+                      localConnection:
+                        type: string
+                        description: localConnectionInfo
+                      cause:
+                        type: string
+                        description: cause
+                      allowed:
+                        type: integer
+                        format: int32
+                        description: cmdsAllowed
+                      flags:
+                        type: integer
+                        format: int32
+                        description: callTypeFlags
+                    example:
+                      monitor: 1
+                      call:
+                        id: 56
+                        device: '199'
+                      calling: '199'
+                      called: '192'
+                      cause: normal
+                      flags: 3145728
+                  - title: NetworkReachedEvent
+                    type: object
+                    description: >- 
+                      NetworkReachedEvent indicates that a call has cut
+                      through the switching sub-domain boundary to another network.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      network:
+                        type: string
+                        description: networkInterfaceUsed>deviceIdentifier
+                      calling:
+                        type: string
+                        description: callingDevice>deviceIdentifier
+                      called:
+                        type: string
+                        description: calledDevice>deviceIdentifier
+                      localConnection:
+                        type: string
+                        description: localConnectionInfo
+                      cause:
+                        type: string
+                        description: cause
+                    example:
+                      monitor: 1
+                      call:
+                        id: 56
+                        device: '199'
+                      network: '190'
+                      calling: '199'
+                      called: '192'
+                      cause: normal
+                  - title: FailedEvent
+                    type: object
+                    description: >- 
+                      FailedEvent indicates that a call cannot be completed or a
+                      connection has entered the Failed state.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      calling:
+                        type: string
+                        description: callingDevice>deviceIdentifier
+                      called:
+                        type: string
+                        description: calledDevice>deviceIdentifier
+                      localConnection:
+                        type: string
+                        description: localConnectionInfo
+                      cause:
+                        type: string
+                        description: cause
+                    example:
+                      monitor: 1
+                      call:
+                        id: 56
+                        device: '199'
+                      calling: '199'
+                      called: '192'
+                      localConnection: ''
+                      cause: normal
+                  - title: RetrievedEvent
+                    type: object
+                    description: >- 
+                      RetrievedEvent indicates that a previously held call has been
+                      retrieved.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      retrieving:
+                        type: string
+                        description: retrievingDevice>deviceIdentifier
+                      localConnection:
+                        type: string
+                        description: localConnectionInfo
+                      cause:
+                        type: string
+                        description: cause
+                      allowed:
+                        type: integer
+                        format: int32
+                        description: cmdsAllowed
+                      flags:
+                        type: integer
+                        format: int32
+                        description: callTypeFlags
+                    example:
+                      monitor: 1
+                      call:
+                        id: 56
+                        device: '199'
+                      retrieving: '199'
+                      localConnection: ''
+                      cause: normal
+                      flags: 3145728
+                  - title: TransferredEvent # в xml название события с ошибкой: одна буква r
+                    type: object
+                    description: >-
+                      TransferedEvent indicates that an existing call has been
+                      transferred to another device and the transferring device has
+                      been dropped from the call.
+                    required: [monitor, call]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      call:
+                        $ref: '#/components/schemas/Call'
+                      transferring:
+                        type: string
+                        description: transferringDevice>deviceIdentifier
+                      to:
+                        type: string
+                        description: transferredToDevice>deviceIdentifier
+                      localConnection:
+                        type: string
+                        description: localConnectionInfo
+                      cause:
+                        type: string
+                        description: cause
+                    example:
+                      monitor: 1
+                      call:
+                        id: 56
+                        device: '199'
+                      transferring: '199'
+                      to: '198'
+                      localConnection: ''
+                      cause: normal
+                      flags: 3145728
+                  - title: ParkedEvent
+                    type: object
+                    description: callParkInfo
+                    required: [monitor, park]
+                    properties:
+                      monitor:
+                        type: integer
+                        format: int32
+                        description: monitorCrossRefID
+                      park: 
+                        type: integer
+                        format: int32
+                        description: parkID
+                    example:
+                      monitor: 1
+                      park: 3
+              example: |
+                  event: presence
+                  data: {"presence":"Available","status":"USER_ACCEPTS_IM","note":"Заметка к статусу"}
+                      
+                  event: ConnectionClearedEvent
+                  data: {"monitor":1,"call":{"id":56,"device":"199"},"releasing":"199","cause":"normal"}
+        default:
+          $ref: '#/components/responses/error'
+
 components:
   securitySchemes:
     SessionToken:
@@ -281,6 +959,41 @@ components:
         в виде параметра запроса `?access_token=...`. Данный подход можно использовать,
         например, при создании запроса на получение событий сервера MX с помощью 
         [HTTP Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
+
+  schemas:
+    Call:
+      title: call
+      type: object
+      description: Описывает информацию о звонке
+      required: [id, device]
+      properties:
+        id: 
+          type: integer
+          format: int32
+          description: callID
+        device:
+          type: string
+          description: deviceID
+        global:
+          type: string
+          description: globalCallID
+      example:
+        id: 18
+        device: '234'
+    Cad:
+      title: cad
+      type: object
+      required: [name, type, value]
+      properties:
+        name:
+          type: string
+          description: name
+        type:
+          type: string
+          description: type
+        value:
+          type: string
+          description: value
 
   responses:
     '204':
