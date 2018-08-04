@@ -13,6 +13,8 @@ github.com/mdigger/rest v0.0.0-20170930000632-3a45fd94f4ea h1:V87SzO1H6ZgcgIwMeD
 github.com/mdigger/rest v0.0.0-20170930000632-3a45fd94f4ea/go.mod h1:DXKTK5jEhBvpcPR4eBn5ue333MCGqm315yzw4RLEQCI=
 github.com/mdigger/router v0.0.0-20160927122710-44303bc346fc h1:aIEJIumJcfpi9wTvLAmo3KAj2us8BHHP9o1Zf1wxW50=
 github.com/mdigger/router v0.0.0-20160927122710-44303bc346fc/go.mod h1:uCW2BJmXuCnuUy9bbsdx7sbfb1qSRFJszA166WC94Nw=
+github.com/mdigger/sse v0.0.0-20170928120544-b49c348d128d h1:fM6hw2Ja4GtAlIk//hUBckSbRj8yqV1pPOWeuMNTD78=
+github.com/mdigger/sse v0.0.0-20170928120544-b49c348d128d/go.mod h1:PvS2ioGqe2LTUi6WZ90D0+JwVLs1TezFb7APPJtt/yc=
 golang.org/x/crypto v0.0.0-20180802221240-56440b844dfe h1:APBCFlxGVQi3YDSHtTbNXRZhDEuz9rrnVPXZA4YbUx8=
 golang.org/x/crypto v0.0.0-20180802221240-56440b844dfe/go.mod h1:6SG95UA2DQfeDnfUPMdvaQW0Q7yPrPDi9nlGo2tz2b4=
 gopkg.in/mdigger/log.v4 v4.0.0-20180726173735-1d5a322ea881 h1:ewOXk3MbhXF3x6xYsKmKQtRL7SK2y4AND2qBxib/Duk=
