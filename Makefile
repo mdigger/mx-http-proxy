@@ -3,15 +3,16 @@ DATE    ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT     ?= $(shell git rev-parse --short HEAD 2>/dev/null)
 FLAGS   := -ldflags "-X main.commit=$(GIT) -X main.date=$(DATE)"
 APPNAME ?=$(shell basename ${PWD})
+MX      = 631hc.connector73.net
 
 debug:
 	go build -race -tags dev $(FLAGS) -o $(APPNAME)
-	LOG=DEV,ALL ./$(APPNAME)
+	LOG=COLOR,ALL ./$(APPNAME) -mx $(MX)
 
 build:
 	go generate
 	go build -race $(FLAGS) -o $(APPNAME)
-	LOG=COLOR,ALL ./$(APPNAME)
+	LOG=COLOR,DEBUG ./$(APPNAME) -mx $(MX)
 
 sertificates:
 	openssl req -x509 -out localhost.crt -keyout localhost.key \
