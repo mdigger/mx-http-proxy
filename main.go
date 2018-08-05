@@ -67,12 +67,12 @@ func main() {
 	// если удалось разобрать дату, то добавляем ее в лог
 	if date, err := time.Parse(time.RFC3339, date); err == nil {
 		verInfoFields = append(verInfoFields,
-			log.Field{Name: "built", Value: date.Format("2006-01-02")})
+			log.Field{Name: "date", Value: date.Format("2006-01-02")})
 	}
 	// добавляем идентификатор коммита, если он задан
 	if commit != "" {
 		verInfoFields = append(verInfoFields,
-			log.Field{Name: "commit", Value: commit})
+			log.Field{Name: "build", Value: commit})
 	}
 	log.Info("service", verInfoFields)
 

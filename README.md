@@ -108,7 +108,7 @@ Content-Length: 180
 
 Сообщения, относящиеся к командам сервера MX используют тип лога - `mx`, а для информации об обработке HTTP-запросов используется - `http`. Все остальные выводы обычно не используют префикс:
 
-    21:52:50.512539 INFO  service name=MX-HTTP-Proxy version=dev built=2018-08-05 commit=063525b
+    21:52:50.512539 INFO  service name=MX-HTTP-Proxy version=dev date=2018-08-05 build=063525b
     21:52:50.512949 INFO  [http]: server listen=localhost:8000 tls=false url=http://localhost:8000/
     21:53:00.036338 TRACE [mx]: dmtest3: <- 0001 <loginRequest type="User" platform="iPhone" version="7.0" loginCapab="Audio" mediaCapab="Voicemail|CallRec"><userName>dmtest3</userName><pwd>nnke/C/yi/f...U5OVTqg5joXHc=&#xA;</pwd></loginRequest>
     21:53:00.070054 TRACE [mx]: dmtest3: -> 0001 <loginResponce Code="0" sn="631HC" apiversion="11" ext="273" userId="43892780322813134" softPhonePwd="yTEuJ15RheF2...BogZXzp27fAqc334X"  proto="TLS" mxport="5061" clientport="1234" >Login OK</loginResponce>
