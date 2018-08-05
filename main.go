@@ -62,6 +62,8 @@ func main() {
 	var host = "localhost:8000"
 	flag.StringVar(&host, "host", host, "http server `host`")
 	flag.StringVar(&MXHost, "mx", MXHost, "mx server `host`")
+	var certFiles = flag.String("cert", "",
+		"comma separated list of public and private key files in PEM format")
 	flag.Var(log.Flag(), "log", "log `level`")
 	flag.Parse()
 
@@ -83,6 +85,26 @@ func main() {
 		hostname != "localhost" &&
 		net.ParseIP(hostname) == nil &&
 		strings.Trim(hostname, "[]") != "::1"
+	// загружаем сертификаты, если они указаны
+	var tlsCertificates []tls.Certificate // загруженные и разобранные сертификаты
+	if certFiles != nil {
+		// разбираем значения параметра
+		var files = strings.SplitN(*certFiles, ",", 2)
+		if len(files) != 2 {
+			log.Error("cert parse", errors.New(
+				"must be two files: server.crt,server.key"))
+			os.Exit(2)
+		}
+		// загружаем и разбираем сами сертификаты
+		cert, err := tls.LoadX509KeyPair(files[0], files[1])
+		if err != nil {
+			log.Error("parsing certificates", err)
+			os.Exit(2)
+		}
+		// формируем список сертификатов
+		tlsCertificates = []tls.Certificate{cert}
+		ssl = true // взводим флаг
+	}
 	if ssl {
 		serverURL.Scheme = "https"
 	}
@@ -127,24 +149,43 @@ func main() {
 	}
 	// добавляем автоматическую поддержку TLS сертификатов для сервиса
 	if ssl {
-		var manager = autocert.Manager{
-			Prompt: autocert.AcceptTOS,
-			HostPolicy: func(_ context.Context, host string) error {
-				if host != hostname {
-					mux.Logger.Error("unsupported https host", "host", host)
-					return errors.New("acme/autocert: host not configured")
-				}
-				return nil
-			},
-			Email: "dmitrys@xyzrd.com",
-			Cache: autocert.DirCache("letsEncrypt.cache"),
-		}
+		// настраиваем поддержку TLS для сервера
 		server.TLSConfig = &tls.Config{
-			GetCertificate: manager.GetCertificate,
+			MinVersion: tls.VersionTLS12,
+			// NextProtos: []string{http2.NextProtoTLS, "http/1.1"},
 		}
-		server.Addr = ":https"
-		// поддержка получения сертификата Let's Encrypt и редирект на HTTPS
-		go http.ListenAndServe(":http", manager.HTTPHandler(nil))
+		// добавляем заголовок с обязательством использования защищенного
+		// соединения в ближайший час
+		mux.Headers["Strict-Transport-Security"] = "max-age=3600"
+		// добавляем сертификат, если он уже загружен
+		if tlsCertificates != nil {
+			server.TLSConfig.Certificates = tlsCertificates
+			server.TLSConfig.BuildNameToCertificate()
+			var hosts = make([]string, 0, len(server.TLSConfig.NameToCertificate))
+			for name := range server.TLSConfig.NameToCertificate {
+				hosts = append(hosts, name)
+			}
+			log.Info("http certificate", "hosts", hosts)
+		} else {
+			// настраиваем автоматическое получение сертификата
+			var manager = autocert.Manager{
+				Prompt: autocert.AcceptTOS,
+				HostPolicy: func(_ context.Context, host string) error {
+					if host != hostname {
+						mux.Logger.Error("unsupported https host", "host", host)
+						return errors.New("acme/autocert: host not configured")
+					}
+					return nil
+				},
+				Email: "dmitrys@xyzrd.com",
+				Cache: autocert.DirCache("letsEncrypt.cache"),
+			}
+			// добавляем получение и обновление сертификатов
+			server.TLSConfig.GetCertificate = manager.GetCertificate
+			server.Addr = ":https" // подменяем порт на 443
+			// поддержка получения сертификата Let's Encrypt и редирект на HTTPS
+			go http.ListenAndServe(":http", manager.HTTPHandler(nil))
+		}
 	}
 	mux.Logger.Info("server",
 		"listen", server.Addr, "tls", ssl, "url", serverURL.String())
