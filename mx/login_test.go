@@ -14,12 +14,12 @@ func init() {
 
 var (
 	mxhost = "631hc.connector73.net"
-	login  = Login{
+	login  = &Login{
 		UserName: "dmtest2",
 		Password: "dmtest2",
 		Type:     "User",
 	}
-	slogin = Login{
+	slogin = &Login{
 		UserName: "cstatest",
 		Password: "cstapass",
 		Type:     "Server",

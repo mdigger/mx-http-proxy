@@ -44,8 +44,10 @@ type Conn struct {
 	closer    func(error)  // функция, вызываемая при закрытии соединения
 }
 
-// Connect устанавливает соединение с сервером MX.
-func Connect(host string, login Login) (*Conn, error) {
+// Connect устанавливает соединение с сервером MX и авторизует пользователя.
+// Если информация для авторизации не указана, то всегда возвращается пустое
+// соединение. Обычно это используется для проверки доступности сервера MX.
+func Connect(host string, login *Login) (*Conn, error) {
 	// добавляем порт по умолчанию, если он не задан в адресе сервера
 	if _, _, err := net.SplitHostPort(host); err != nil {
 		var err, ok = err.(*net.AddrError)
@@ -63,6 +65,12 @@ func Connect(host string, login Login) (*Conn, error) {
 		&tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		return nil, err
+	}
+	// если логин не указан, то на этом все завершаем - просто проверка
+	// доступности MX
+	if login == nil {
+		conn.Close()
+		return nil, nil
 	}
 	// инициализируем описание соединения
 	var mx = &Conn{
