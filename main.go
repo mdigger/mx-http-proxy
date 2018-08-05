@@ -61,9 +61,9 @@ func main() {
 	// разбираем параметры сервиса
 	var host = "localhost:8000"
 	flag.StringVar(&host, "http", host, "http server `host`")
-	flag.StringVar(&MXHost, "mx", MXHost, "mx server `host`")
-	var certFiles = flag.String("cert", "",
+	var certFiles = flag.String("certs", "",
 		"comma separated list of public and private key files in PEM format")
+	flag.StringVar(&MXHost, "mx", MXHost, "mx server `host`")
 	flag.Var(log.Flag(), "log", "log `level`")
 	flag.Parse()
 
