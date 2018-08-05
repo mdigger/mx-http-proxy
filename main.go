@@ -42,6 +42,12 @@ func init() {
 	if commit != "" {
 		agent += fmt.Sprintf(" (%s)", commit)
 	}
+	// изменяем уровень вывода в лог по умолчанию и заново инициализируем
+	// возможные настройки, если они были заданы в виде переменной окружения
+	log.SetLevel(log.INFO)
+	if config, ok := os.LookupEnv("LOG"); ok {
+		log.Flag().Set(config)
+	}
 }
 
 func main() {
