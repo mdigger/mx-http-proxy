@@ -97,7 +97,7 @@ func (c *Conn) reading() {
 		if data, err := json.Marshal(obj); err == nil {
 			// отправляем информацию о событии в соответствующий обработчик
 			c.sse.Data(name, string(data), "")
-			log.Debug("SSE",
+			log.Debug("sse",
 				"user", c.login.UserName,
 				"event", name,
 				"data", string(data))
