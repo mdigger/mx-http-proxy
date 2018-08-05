@@ -122,8 +122,11 @@ func main() {
 
 	// инициализируем обработку HTTP запросов
 	var mux = &rest.ServeMux{
-		Headers: map[string]string{"Server": agent},
-		Logger:  log.New("http"),
+		Headers: map[string]string{
+			"Server":                      agent,
+			"Access-Control-Allow-Origin": "*",
+		},
+		Logger: log.New("http"),
 	}
 	// обработчики команд
 	mux.Handle("POST", "/login", conns.Login)
