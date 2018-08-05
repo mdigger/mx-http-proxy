@@ -65,7 +65,7 @@ func (l *Conns) Login(c *rest.Context) error {
 	}
 	c.AddLogField("user", login.UserName)
 	// подключаемся к серверу и авторизуем пользователя
-	conn, err := Connect(MXHost, *login)
+	conn, err := Connect(mxHost, login)
 	if err != nil {
 		return httpError(err)
 	}

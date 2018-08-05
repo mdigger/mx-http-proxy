@@ -16,14 +16,14 @@ type Conn struct {
 }
 
 // Connect подключается к серверу MX и авторизует пользователя.
-func Connect(host string, login mx.Login) (*Conn, error) {
+func Connect(host string, login *mx.Login) (*Conn, error) {
 	conn, err := mx.Connect(host, login) // устанавливаем соединение и авторизуемся
 	if err != nil {
 		return nil, err
 	}
 	var mxconn = &Conn{
 		Conn:  conn,
-		login: login,
+		login: *login,    // копируем данные о логине
 		sse:   sse.New(), // инициализируем брокера для отправики событий
 	}
 	go mxconn.reading() // запускаем обработчик входящих событий от сервера MX
