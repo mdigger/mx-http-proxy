@@ -29,8 +29,8 @@ var (
 	date    = ""   // дата сборки
 	agent   string // используется как строка с именем сервиса
 
-	// MXHost содержит адрес сервера MX.
-	MXHost = "631hc.connector73.net"
+	// mxHost содержит адрес сервера MX.
+	mxHost string // "631hc.connector73.net"
 )
 
 func init() {
@@ -42,20 +42,28 @@ func init() {
 	if commit != "" {
 		agent += fmt.Sprintf(" (%s)", commit)
 	}
-	// изменяем уровень вывода в лог по умолчанию и заново инициализируем
-	// возможные настройки, если они были заданы в виде переменной окружения
+	// изменяем уровень вывода в лог по умолчанию и перечитываем значения
+	// из переменной окружения, если она была задана
 	log.SetLevel(log.INFO)
-	if config, ok := os.LookupEnv("LOG"); ok {
-		log.Flag().Set(config)
+	if env, ok := os.LookupEnv("LOG"); ok {
+		log.Flag().Set(env)
 	}
+
 }
 
 func main() {
 	// разбираем параметры сервиса
-	var host = flag.String("http", "localhost:8000", "http server `host`")
-	var certFiles = flag.String("certs", "",
+	var host = "localhost:8000"
+	flag.StringVar(&host, "http", host, "http server `host`")
+	// имена файлов с сертификатами
+	var certFiles, _ = os.LookupEnv("CERTS")
+	flag.StringVar(&certFiles, "certs", "",
 		"comma separated list of public and private key files in PEM format")
-	flag.StringVar(&MXHost, "mx", MXHost, "mx server `host`")
+	// считываем адрес сервера MX
+	if name, ok := os.LookupEnv("MX"); ok {
+		mxHost = name
+	}
+	flag.StringVar(&mxHost, "mx", mxHost, "mx server `host`")
 	flag.Var(log.Flag(), "log", "log `level`")
 	flag.Parse()
 
@@ -77,17 +85,17 @@ func main() {
 	log.Info("service", verInfoFields)
 
 	// разбираем адрес HTTP-сервера
-	hostname, port, err := net.SplitHostPort(*host)
+	hostname, port, err := net.SplitHostPort(host)
 	if err != nil {
 		if err, ok := err.(*net.AddrError); ok && err.Err == "missing port in address" {
-			hostname = err.Addr
+			hostname = strings.Trim(err.Addr, "[]")
 		} else {
 			log.Error("http host parse error", err)
 			os.Exit(2)
 		}
 	}
 	// формируем адрес для обращения к серверу
-	var serverURL = &url.URL{Scheme: "http", Host: *host, Path: "/"}
+	var serverURL = &url.URL{Scheme: "http", Host: host, Path: "/"}
 	// вычисляем, требуется ли получение сертификата
 	var ssl = (port == "443" || port == "") &&
 		hostname != "" &&
@@ -96,9 +104,9 @@ func main() {
 		strings.Trim(hostname, "[]") != "::1"
 	// загружаем сертификаты, если они указаны
 	var tlsCertificates []tls.Certificate // загруженные и разобранные сертификаты
-	if *certFiles != "" {
+	if certFiles != "" {
 		// разбираем значения параметра
-		var files = strings.SplitN(*certFiles, ",", 2)
+		var files = strings.SplitN(certFiles, ",", 2)
 		if len(files) != 2 {
 			log.Error("cert parse", errors.New(
 				"must be two files: server.crt,server.key"))
@@ -126,6 +134,12 @@ func main() {
 
 	// настраиваем вывод лога MX
 	mx.Logger = log.StdLog(log.TRACE, "mx")
+	// проверяем доступность сервера MX
+	if _, err = mx.Connect(mxHost, nil); err != nil {
+		log.Error("mx connection", err)
+		os.Exit(2)
+	}
+	log.Info("mx server", "addr", mxHost)
 	var conns = new(Conns) // инициализируем список подключений к MX
 	defer conns.Close()    // закрываем все соединения по окончании
 
@@ -153,7 +167,7 @@ func main() {
 
 	// инициализируем и запускаем сервер HTTP
 	var server = http.Server{
-		Addr:              *host,
+		Addr:              host,
 		Handler:           mux,
 		IdleTimeout:       10 * time.Minute,
 		ReadHeaderTimeout: 5 * time.Second,
