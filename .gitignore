@@ -3,3 +3,5 @@ mx-http-proxy
 mx-http-proxy.*
 assets_vfsdata.go
 debug
+localhost.crt
+localhost.key
