@@ -17,9 +17,9 @@ import (
 	"time"
 
 	"github.com/mdigger/log"
+	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/rest"
 	"golang.org/x/crypto/acme/autocert"
-	"gopkg.in/mdigger/mx.v2"
 )
 
 var (

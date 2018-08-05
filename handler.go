@@ -9,8 +9,8 @@ import (
 	"sync"
 
 	"github.com/mdigger/log"
+	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/rest"
-	"gopkg.in/mdigger/mx.v2"
 )
 
 // Conns описывает список подключений к серверам MX.

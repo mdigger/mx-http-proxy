@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"github.com/mdigger/log"
+	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/rest"
-	"gopkg.in/mdigger/mx.v2"
 )
 
 // getToken возвращает авторизационный токен из запроса

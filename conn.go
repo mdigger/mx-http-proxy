@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 
 	"github.com/mdigger/log"
+	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/sse"
-	"gopkg.in/mdigger/mx.v2"
 )
 
 // Conn описывает соединение с сервером MX.
