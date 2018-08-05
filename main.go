@@ -36,13 +36,28 @@ var (
 func init() {
 	// избавляемся от префикса `v` в версии
 	version = strings.TrimPrefix(version, "v")
+	// инициализируем строку с агентом
+	agent = fmt.Sprintf("%s/%s", appName, version)
+	// добавляем идентификатор коммита, если он задан
+	if commit != "" {
+		agent += fmt.Sprintf(" (%s)", commit)
+	}
+}
+
+func main() {
+	// разбираем параметры сервиса
+	var host = flag.String("http", "localhost:8000", "http server `host`")
+	var certFiles = flag.String("certs", "",
+		"comma separated list of public and private key files in PEM format")
+	flag.StringVar(&MXHost, "mx", MXHost, "mx server `host`")
+	flag.Var(log.Flag(), "log", "log `level`")
+	flag.Parse()
+
 	// выводим информацию о текущей версии
 	var verInfoFields = []log.Field{
 		log.Field{Name: "name", Value: appName},
 		log.Field{Name: "version", Value: version},
 	}
-	// инициализируем строку с агентом
-	agent = fmt.Sprintf("%s/%s", appName, version)
 	// если удалось разобрать дату, то добавляем ее в лог
 	if date, err := time.Parse(time.RFC3339, date); err == nil {
 		verInfoFields = append(verInfoFields,
@@ -52,23 +67,11 @@ func init() {
 	if commit != "" {
 		verInfoFields = append(verInfoFields,
 			log.Field{Name: "commit", Value: commit})
-		agent += fmt.Sprintf(" (%s)", commit)
 	}
 	log.Info("service", verInfoFields)
-}
-
-func main() {
-	// разбираем параметры сервиса
-	var host = "localhost:8000"
-	flag.StringVar(&host, "http", host, "http server `host`")
-	var certFiles = flag.String("certs", "",
-		"comma separated list of public and private key files in PEM format")
-	flag.StringVar(&MXHost, "mx", MXHost, "mx server `host`")
-	flag.Var(log.Flag(), "log", "log `level`")
-	flag.Parse()
 
 	// разбираем адрес HTTP-сервера
-	hostname, port, err := net.SplitHostPort(host)
+	hostname, port, err := net.SplitHostPort(*host)
 	if err != nil {
 		if err, ok := err.(*net.AddrError); ok && err.Err == "missing port in address" {
 			hostname = err.Addr
@@ -78,7 +81,7 @@ func main() {
 		}
 	}
 	// формируем адрес для обращения к серверу
-	var serverURL = &url.URL{Scheme: "http", Host: host, Path: "/"}
+	var serverURL = &url.URL{Scheme: "http", Host: *host, Path: "/"}
 	// вычисляем, требуется ли получение сертификата
 	var ssl = (port == "443" || port == "") &&
 		hostname != "" &&
@@ -87,7 +90,7 @@ func main() {
 		strings.Trim(hostname, "[]") != "::1"
 	// загружаем сертификаты, если они указаны
 	var tlsCertificates []tls.Certificate // загруженные и разобранные сертификаты
-	if certFiles != nil {
+	if *certFiles != "" {
 		// разбираем значения параметра
 		var files = strings.SplitN(*certFiles, ",", 2)
 		if len(files) != 2 {
@@ -144,7 +147,7 @@ func main() {
 
 	// инициализируем и запускаем сервер HTTP
 	var server = http.Server{
-		Addr:              host,
+		Addr:              *host,
 		Handler:           mux,
 		IdleTimeout:       10 * time.Minute,
 		ReadHeaderTimeout: 5 * time.Second,
