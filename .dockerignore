@@ -1,0 +1,15 @@
+Dockerfile*
+docker-compose*
+.dockerignore
+.git
+.gitignore
+README.md
+LICENSE
+.vscode
+assets_vfsdata.go
+mx-http-proxy
+mx-http-proxy.*
+localhost.crt
+localhost.key
+debug
+.DS_Store
