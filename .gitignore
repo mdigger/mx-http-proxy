@@ -5,3 +5,4 @@ assets_vfsdata.go
 debug
 localhost.crt
 localhost.key
+docker-compose.debug.yml
