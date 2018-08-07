@@ -6,7 +6,6 @@ import (
 	"bufio"
 	"context"
 	"crypto/tls"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -42,8 +41,10 @@ func env(name, def string) string {
 func main() {
 	// разбираем параметры сервиса
 	flag.StringVar(&mxhost, "mx", mxhost, "mx server `host`")
-	var httphost = flag.String("port", env("PORT", ":8000"), "http server `port`")
-	var letsencrypt = flag.String("letsencrypt", "", "domain `host` name")
+	var httphost = flag.String("port", env("PORT", ":8000"),
+		"http server `port`")
+	var letsencrypt = flag.String("letsencrypt", env("LETSENCRYPT_HOSTS", ""),
+		"domain `host` name")
 	flag.Parse()
 	log.Info("service", logInfo) // выводим в лог информацию о версии сервиса
 
@@ -51,16 +52,16 @@ func main() {
 	mx.Logger = mxlogger.StdLog(log.TRACE) // настраиваем вывод лога MX
 	// проверяем доступность сервера MX
 	if _, err := mx.Connect(mxhost, nil); err != nil {
-		mxlogger.Error("connection", "host", mxhost, err)
+		mxlogger.Error("mx server unavailable", "host", mxhost, err)
 		os.Exit(2)
 	}
-	mxlogger.Info("server address", "host", mxhost)
+	mxlogger.Info("using mx server", "host", mxhost)
 	var conns = new(Conns) // инициализируем список подключений к MX
 	defer conns.Close()    // закрываем все соединения по окончании
 
 	// разбираем имя хоста
 	if port, err := strconv.ParseInt(*httphost, 10, 16); err == nil && port > 0 {
-		*httphost = fmt.Sprintf(":%s", *httphost) // указан только порт
+		*httphost = ":" + *httphost // указан только порт
 	} else if _, _, err := net.SplitHostPort(*httphost); err != nil {
 		if err, ok := err.(*net.AddrError); ok && err.Err == "missing port in address" {
 			*httphost = net.JoinHostPort(strings.Trim(err.Addr, "[]"), "80")
@@ -116,6 +117,7 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 		ErrorLog:          httplogger.StdLog(log.ERROR),
 	}
+	var tlsCertificates []tls.Certificate // загруженные и разобранные сертификаты
 	// настраиваем автоматическое получение сертификата
 	if *letsencrypt != "" {
 		if *letsencrypt == "localhost" || net.ParseIP(*letsencrypt) != nil {
@@ -127,53 +129,42 @@ func main() {
 		// соединения в ближайший час
 		mux.Headers["Strict-Transport-Security"] = "max-age=3600"
 		// настраиваем поддержку TLS для сервера
+		var manager = autocert.Manager{
+			Prompt: autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(
+				strings.Split(*letsencrypt, ",")...),
+			Email: "dmitrys@xyzrd.com",
+			Cache: autocert.DirCache("~/letsEncrypt.cache"),
+		}
 		server.TLSConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
 			// NextProtos: []string{http2.NextProtoTLS, "http/1.1"},
+			GetCertificate: manager.GetCertificate,
 		}
-		// добавляем сертификат, если он уже загружен
-		var tlsCertificates []tls.Certificate // загруженные и разобранные сертификаты
-		if tlsCertificates != nil {
-			server.TLSConfig.Certificates = tlsCertificates
-			server.TLSConfig.BuildNameToCertificate()
-			var hosts = make([]string, 0, len(server.TLSConfig.NameToCertificate))
-			for name := range server.TLSConfig.NameToCertificate {
-				hosts = append(hosts, name)
-			}
-			httplogger.Info("server with tls certificate",
-				"listen", server.Addr,
-				"tls", true,
-				"hosts", hosts,
-			)
-		} else {
-			var manager = autocert.Manager{
-				Prompt: autocert.AcceptTOS,
-				HostPolicy: func(_ context.Context, host string) error {
-					if host != *letsencrypt {
-						httplogger.Warn("ignore address", "host", host)
-						return errors.New("acme/autocert: host not configured")
-					}
-					return nil
-				},
-				Email: "dmitrys@xyzrd.com",
-				Cache: autocert.DirCache("letsEncrypt.cache"),
-			}
-			// добавляем каталог для хранения сертификатов, если мы не в
-			// контейнере
-			// if !isDocker() {
-			// 	manager.Cache = autocert.DirCache("letsEncrypt.cache")
-			// }
-			// добавляем получение и обновление сертификатов
-			server.TLSConfig.GetCertificate = manager.GetCertificate
-			server.Addr = ":https" // подменяем порт на 443
-			// поддержка получения сертификата Let's Encrypt и редирект на HTTPS
-			go http.ListenAndServe(":http", manager.HTTPHandler(nil))
-			httplogger.Info("server with let'encrypt autocert",
-				"listen", []string{":80", ":443"},
-				"tls", true,
-				"host", *letsencrypt,
-			)
+		// добавляем получение и обновление сертификатов
+		server.Addr = ":https" // подменяем порт на 443
+		// поддержка получения сертификата Let's Encrypt и редирект на HTTPS
+		go http.ListenAndServe(":http", manager.HTTPHandler(nil))
+		httplogger.Info("server with let'encrypt autocert",
+			"listen", []string{":80", ":443"},
+			"tls", true,
+			"host", *letsencrypt,
+		)
+	} else if tlsCertificates != nil {
+		server.TLSConfig = &tls.Config{
+			MinVersion:   tls.VersionTLS12,
+			Certificates: tlsCertificates,
 		}
+		server.TLSConfig.BuildNameToCertificate()
+		var hosts = make([]string, 0, len(server.TLSConfig.NameToCertificate))
+		for name := range server.TLSConfig.NameToCertificate {
+			hosts = append(hosts, name)
+		}
+		httplogger.Info("server with tls certificate",
+			"listen", server.Addr,
+			"tls", true,
+			"hosts", hosts,
+		)
 	} else {
 		httplogger.Info("server",
 			"listen", server.Addr,
