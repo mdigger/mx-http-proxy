@@ -1,7 +1,7 @@
 APPNAME ?= $(shell basename ${PWD})
 DATE	:= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 GIT		:= $(shell git rev-parse --short HEAD 2>/dev/null)
-TAG		:= $(shell git describe --tag --long --dirty 2>/dev/null)
+TAG		:= $(shell git describe --tag 2>/dev/null)
 FLAGS   := -ldflags "-X main.version=$(TAG) -X main.commit=$(GIT) -X main.buildDate=$(DATE)"
 MX      = 631hc.connector73.net
 
@@ -15,13 +15,20 @@ info:
 	@echo "────────────────────────────────"
 
 .PHONY: debug
-debug: info
-	go build -race -tags dev $(FLAGS) -o $(APPNAME) 
+debug: build-debug run
 
 .PHONY: release
-release: info
+release: build-release run
+
+.PHONY: build-debug
+build-debug: info
+	go build -i -race -tags dev $(FLAGS) -o $(APPNAME) 
+
+.PHONY: build-release
+build-release: info
+	go get -d -v github.com/shurcooL/vfsgen github.com/shurcooL/httpfs/filter
 	go generate ./...
-	go build -race $(FLAGS) -o $(APPNAME)
+	go build -i -race $(FLAGS) -o $(APPNAME)
 
 .PHONY: run
 run:
