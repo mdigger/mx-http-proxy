@@ -9,12 +9,14 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
 	"os/signal"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -88,6 +90,22 @@ func main() {
 	// внедренных в исполняемый файл данных
 	if assets, ok := assets.(http.Dir); ok {
 		httplogger.Warn("live http assets", "folder", assets)
+	}
+	// добавляем версию документации
+	if file, err := assets.Open("openapi.yaml"); err == nil {
+		if data, err := ioutil.ReadAll(file); err == nil {
+			var v = regexp.MustCompile(`version:\s(.+)`).FindSubmatch(data)
+			if len(v) == 2 {
+				var ver = string(v[1])
+				httplogger.Info("api docs", "version", ver)
+				mux.Headers["X-API-Version"] = ver // добавляем версию API
+			}
+		}
+		file.Close()
+	} else {
+		// документация недоступна ни в виде отдельного каталога, ни в виде
+		// встроенных в исполняемый файл данных
+		httplogger.Warn("no http documentation")
 	}
 
 	// инициализируем и запускаем сервер HTTP
