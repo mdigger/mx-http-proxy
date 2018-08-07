@@ -6,6 +6,7 @@ docker-compose*
 .gitignore
 README.md
 LICENSE
+Makefile
 .vscode
-mxhttp
-!/mxhttp
+mx-http-proxy
+*_generated.go
