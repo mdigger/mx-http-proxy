@@ -134,7 +134,7 @@ func main() {
 			HostPolicy: autocert.HostWhitelist(
 				strings.Split(*letsencrypt, ",")...),
 			Email: "dmitrys@xyzrd.com",
-			Cache: autocert.DirCache("~/letsEncrypt.cache"),
+			Cache: autocert.DirCache("letsEncrypt.cache"),
 		}
 		server.TLSConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
@@ -211,8 +211,8 @@ func init() {
 		fmt.Printf("- %s\n", env)
 	}
 
-	readFile("/etc/hosts")
-	readFile("/etc/passwd")
+	// readFile("/etc/hosts")
+	// readFile("/etc/passwd")
 
 	fmt.Println("files:")
 	if err := filepath.Walk("/",
@@ -226,7 +226,7 @@ func init() {
 					return filepath.SkipDir
 				}
 			}
-			fmt.Printf("- %s\n", path)
+			fmt.Printf("- [%[2]v]\t%[1]s\n", path, info.Mode())
 			return nil
 		}); err != nil {
 		fmt.Println("error:", err)
@@ -244,10 +244,13 @@ func readFile(name string) error {
 	var r = bufio.NewReader(file)
 	for {
 		str, err := r.ReadString('\n')
+		if str != "" {
+			fmt.Print("- ", str)
+		}
 		if err != nil {
+			fmt.Println()
 			break
 		}
-		fmt.Print("- ", str)
 	}
 	return nil
 }

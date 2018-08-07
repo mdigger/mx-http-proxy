@@ -49,7 +49,10 @@ docker-build: info
 
 .PHONY: docker-run
 docker-run:
-	docker run -p 8000:8000 -e MX=$(MX) $(APPNAME) -log all,color
+	docker run -p 8000:8000 \
+	-e MX=$(MX) \
+	$(APPNAME) -log all,color
+	# --mount source=certs,target=/app \
 
 .PHONY: sertificates
 sertificates:

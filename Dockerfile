@@ -28,12 +28,12 @@ ARG LOG
 ARG MX
 ARG PORT
 LABEL version=${VERSION:-"dev"} commit=${COMMIT} date=${DATE} \
-maintainer="dmitrys@xyzrd.com" company="xyzrd.com"
-WORKDIR /app
+maintainer="dmitrys@xyzrd.com" vendor="xyzrd.com" \
+description="MX HTTP REST API Proxy service"
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/bin/mx-http-proxy /app/
-USER 1000:1000
-ENV PORT="${PORT}" MX="${MX}" LOG="${LOG}" PATH="/app" HOME="/app"
+COPY --from=builder /go/bin/mx-http-proxy /
+ENV PORT="${PORT}" MX="${MX}" LOG="${LOG}" PATH="/"
 EXPOSE ${PORT}
-ENTRYPOINT ["/app/mx-http-proxy"]
+VOLUME ["/letsEncrypt.cache"]
+ENTRYPOINT ["/mx-http-proxy"]
 # CMD ["--help"]
