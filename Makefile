@@ -1,7 +1,7 @@
 APPNAME ?= $(shell basename ${PWD})
-DATE	:= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+DATE	:= $(shell date -u +%FT%TZ)
 GIT		:= $(shell git rev-parse --short HEAD 2>/dev/null)
-TAG		:= $(shell git describe --tag 2>/dev/null)
+TAG		:= $(shell git describe --tag 2>/dev/null) # --abbrev=0
 FLAGS   := -ldflags "-X main.version=$(TAG) -X main.commit=$(GIT) -X main.buildDate=$(DATE)"
 MX      = 631hc.connector73.net
 
@@ -28,7 +28,8 @@ build-debug: info
 build-release: info
 	go get -d -v github.com/shurcooL/vfsgen github.com/shurcooL/httpfs/filter
 	go generate ./...
-	go build -i -race $(FLAGS) -o $(APPNAME)
+	go build -i -race -a -o $(APPNAME) \
+	$(FLAGS) 
 
 .PHONY: run
 run:
@@ -40,6 +41,7 @@ docker: | docker-build docker-run
 .PHONY: docker-build
 docker-build: info
 	docker build -t $(APPNAME) \
+	--no-cache \
 	--build-arg VERSION=$(TAG) \
 	--build-arg COMMIT=$(GIT) \
 	--build-arg DATE=$(DATE) \
