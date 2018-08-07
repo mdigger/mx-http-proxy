@@ -52,6 +52,6 @@ func init() {
 
 // isDocker возвращает true, если приложение запущено в контейнере.
 func isDocker() bool {
-	_, err := os.Stat(".dockerenv")
+	_, err := os.Stat("/.dockerenv")
 	return err == nil
 }

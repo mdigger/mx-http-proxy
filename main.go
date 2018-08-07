@@ -158,6 +158,11 @@ func main() {
 				Email: "dmitrys@xyzrd.com",
 				Cache: autocert.DirCache("letsEncrypt.cache"),
 			}
+			// добавляем каталог для хранения сертификатов, если мы не в
+			// контейнере
+			// if !isDocker() {
+			// 	manager.Cache = autocert.DirCache("letsEncrypt.cache")
+			// }
 			// добавляем получение и обновление сертификатов
 			server.TLSConfig.GetCertificate = manager.GetCertificate
 			server.Addr = ":https" // подменяем порт на 443
@@ -189,15 +194,15 @@ func main() {
 	} else {
 		httplogger.Info("server stopped")
 	}
-
-	if isDocker() {
-		info()
-	}
 }
 
 // печатает информацию о содержимом контейнера
 // используется для отладки
-func info() {
+func init() {
+	if !isDocker() {
+		return
+	}
+
 	fmt.Println("----------------------------------------------")
 
 	if val, err := os.Getwd(); err == nil {
