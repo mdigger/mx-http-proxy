@@ -27,12 +27,16 @@ var (
 func init() {
 	logInfo = []log.Field{log.Field{Name: "name", Value: appName}}
 	if version = strings.TrimPrefix(version, "v"); version != "" {
+		if commit != "" {
+			version = strings.TrimSuffix(
+				strings.TrimSuffix(version, commit), "-g")
+		}
 		logInfo = append(logInfo, log.Field{Name: "version", Value: version})
 	}
 	if buildDate != "" {
 		var dateField = log.Field{Name: "build", Value: buildDate}
 		if d, _ := time.Parse(time.RFC3339, buildDate); !d.IsZero() {
-			dateField.Value = d.Format("2006-01-02")
+			dateField.Value = d.Local().Format("2006-01-02T15:04")
 		}
 		logInfo = append(logInfo, dateField)
 	}
