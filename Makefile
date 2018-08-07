@@ -31,3 +31,10 @@ docker: info
 .PHONY: run
 run:
 	docker run -p 8000:8000 -e MX=$(MX) $(APPNAME) -log all,color
+
+.PHONY: sertificates
+sertificates:
+	openssl req -x509 -out localhost.crt -keyout localhost.key \
+	-newkey rsa:2048 -nodes -sha256 \
+	-subj '/CN=localhost' -extensions EXT -config <( \
+	printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
