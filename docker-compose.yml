@@ -1,8 +1,0 @@
-version: '2.1'
-
-services:
-  mx-http-proxy:
-    image: mx-http-proxy
-    build: .
-    ports:
-      - 8000:8000

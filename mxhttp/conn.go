@@ -3,8 +3,9 @@ package main
 import (
 	"encoding/json"
 
+	"mx-http-proxy/mx"
+
 	"github.com/mdigger/log"
-	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/sse"
 )
 

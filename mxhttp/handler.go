@@ -8,8 +8,9 @@ import (
 	"strings"
 	"sync"
 
+	"mx-http-proxy/mx"
+
 	"github.com/mdigger/log"
-	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/rest"
 )
 
@@ -65,7 +66,7 @@ func (l *Conns) Login(c *rest.Context) error {
 	}
 	c.AddLogField("user", login.UserName)
 	// подключаемся к серверу и авторизуем пользователя
-	conn, err := Connect(mxHost, login)
+	conn, err := Connect(mxhost, login)
 	if err != nil {
 		return httpError(err)
 	}
