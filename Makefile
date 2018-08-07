@@ -16,20 +16,30 @@ info:
 
 .PHONY: debug
 debug: info
-	go mod tidy
-	go build -race -tags dev $(FLAGS) -o $(APPNAME) ./mxhttp
+	go build -race -tags dev $(FLAGS) -o $(APPNAME) 
+
+.PHONY: release
+release: info
+	go generate ./...
+	go build -race $(FLAGS) -o $(APPNAME)
+
+.PHONY: run
+run:
+	./$(APPNAME) -log all,color -mx $(MX) -port localhost:8000
 
 .PHONY: docker
-docker: info
+docker: | docker-build docker-run
+
+.PHONY: docker-build
+docker-build: info
 	docker build -t $(APPNAME) \
 	--build-arg VERSION=$(TAG) \
 	--build-arg COMMIT=$(GIT) \
 	--build-arg DATE=$(DATE) \
 	.
-	docker run -p 8000:8000 -e MX=$(MX) $(APPNAME)
 
-.PHONY: run
-run:
+.PHONY: docker-run
+docker-run:
 	docker run -p 8000:8000 -e MX=$(MX) $(APPNAME) -log all,color
 
 .PHONY: sertificates
