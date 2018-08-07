@@ -1,21 +1,32 @@
+ARG VERSION
+ARG COMMIT
+ARG DATE
 
-#build stage
-FROM golang:alpine AS builder
+# FROM golang:alpine AS builder
+FROM golang:rc-alpine AS builder
+ARG VERSION
+ARG COMMIT
+ARG DATE
 RUN apk --no-cache add git
-WORKDIR /go/src/github.com/mdigger/mx-http-proxy
+WORKDIR /app
 COPY . .
-RUN go get -d -v github.com/shurcooL/vfsgen github.com/shurcooL/httpfs/filter ./...
-RUN go generate
-RUN CGO_ENABLED=0 GOOS=linux go install -v -ldflags '-w -s' -a -installsuffix cgo ./...
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 \
+go install -i -ldflags "-w -s -X main.version=$VERSION -X main.commit=$COMMIT -X main.buildDate=$DATE" \
+-a -installsuffix cgo ./... && \
+echo "mdigger:x:1000:1000::/app:" > passwd
 
-# COPY .git .
-# RUN GIT_COMMIT=$(git rev-list -1 HEAD) && \
-#     go build -ldflags "-X main.GitCommit=$GIT_COMMIT"
-
-#final stage
-FROM scratch 
+FROM scratch
+ARG VERSION
+ARG COMMIT
+ARG DATE
+LABEL version=${VERSION:-"dev"} commit=${COMMIT} date=${DATE} \
+maintainer="dmitrys@xyzrd.com" company="xyzrd.com"
+WORKDIR /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/bin/mx-http-proxy ./mx-http-proxy
-ENTRYPOINT ["./mx-http-proxy", "-http=:8000"]
-LABEL Name="mx-http-proxy" Version="0.0.1"
-EXPOSE 8000
+COPY --from=builder /go/bin/mxhttp /app/
+COPY --from=builder /app/passwd /etc/
+USER mdigger
+ENV PORT="8000" MX="" PATH="/app"
+EXPOSE ${PORT}
+ENTRYPOINT ["/app/mxhttp"]
+# CMD ["--help"]

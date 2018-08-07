@@ -1,22 +1,33 @@
-.PHONY: debug build sertificates
-DATE    ?= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-GIT     ?= $(shell git rev-parse --short HEAD 2>/dev/null)
-FLAGS   := -ldflags "-X main.commit=$(GIT) -X main.date=$(DATE)"
-APPNAME ?=$(shell basename ${PWD})
+APPNAME ?= $(shell basename ${PWD})
+DATE	:= $(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
+GIT		:= $(shell git rev-parse --short HEAD 2>/dev/null)
+TAG		:= $(shell git describe --tag --long --dirty 2>/dev/null)
+FLAGS   := -ldflags "-X main.version=$(TAG) -X main.commit=$(GIT) -X main.buildDate=$(DATE)"
 MX      = 631hc.connector73.net
 
-debug:
-	go build -race -tags dev $(FLAGS) -o $(APPNAME)
-	LOG=COLOR,ALL ./$(APPNAME) -mx $(MX)
+.PHONY: info
+info:
+	@echo "────────────────────────────────"
+	@echo "Go:       $(subst go version ,,$(shell go version))"
+	@echo "Date:     $(DATE)"
+	@echo "Git:      $(GIT)"
+	@echo "Version:  $(TAG)"
+	@echo "────────────────────────────────"
 
-build:
-	go generate
-	go build -race $(FLAGS) -o $(APPNAME)
-	LOG=COLOR,DEBUG ./$(APPNAME) -mx $(MX)
+.PHONY: debug
+debug: info
+	go mod tidy
+	go build -race -tags dev $(FLAGS) -o $(APPNAME) ./mxhttp
 
-sertificates:
-	openssl req -x509 -out localhost.crt -keyout localhost.key \
-	-newkey rsa:2048 -nodes -sha256 \
-	-subj '/CN=localhost' -extensions EXT -config <( \
-	printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+.PHONY: docker
+docker: info
+	docker build -t $(APPNAME) \
+	--build-arg VERSION=$(TAG) \
+	--build-arg COMMIT=$(GIT) \
+	--build-arg DATE=$(DATE) \
+	.
+	docker run -p 8000:8000 -e MX=$(MX) $(APPNAME)
 
+.PHONY: run
+run:
+	docker run -p 8000:8000 -e MX=$(MX) $(APPNAME) -log all,color
