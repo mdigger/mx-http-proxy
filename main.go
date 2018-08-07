@@ -51,10 +51,10 @@ func main() {
 	mx.Logger = mxlogger.StdLog(log.TRACE) // настраиваем вывод лога MX
 	// проверяем доступность сервера MX
 	if _, err := mx.Connect(mxhost, nil); err != nil {
-		mxlogger.Error("connection", "addr", mxhost, err)
+		mxlogger.Error("connection", "host", mxhost, err)
 		os.Exit(2)
 	}
-	mxlogger.Info("server", "addr", mxhost)
+	mxlogger.Info("server address", "host", mxhost)
 	var conns = new(Conns) // инициализируем список подключений к MX
 	defer conns.Close()    // закрываем все соединения по окончании
 
