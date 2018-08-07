@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/xml"
 
-	"mx-http-proxy/mx"
+	"github.com/mdigger/mx-http-proxy/mx"
 )
 
 type (

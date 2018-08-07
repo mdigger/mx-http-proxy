@@ -7,9 +7,8 @@ import (
 	"net/http"
 	"strings"
 
-	"mx-http-proxy/mx"
-
 	"github.com/mdigger/log"
+	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/rest"
 )
 

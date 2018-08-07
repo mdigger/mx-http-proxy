@@ -1,3 +1,5 @@
+//go:generate go run -tags=dev assets_generate.go
+
 package main
 
 import (
@@ -17,7 +19,7 @@ import (
 	"strings"
 	"time"
 
-	"mx-http-proxy/mx"
+	"github.com/mdigger/mx-http-proxy/mx"
 
 	"github.com/mdigger/log"
 	"github.com/mdigger/rest"
@@ -79,6 +81,14 @@ func main() {
 	mux.Handle("POST", "/logout", conns.Logout)
 	mux.Handle("POST", "/:cmd", conns.Commands)
 	mux.Handle("GET", "/events", conns.Events)
+	// добавляем обработку отдачи документации и дополнительных статических
+	// файлов через веб-сервер
+	mux.Handle("GET", "/*file", rest.HTTPFiles(assets, "index.html"))
+	// проверяем, что вывод осуществляется из "живого" каталога, а не из
+	// внедренных в исполняемый файл данных
+	if assets, ok := assets.(http.Dir); ok {
+		httplogger.Warn("live http assets", "folder", assets)
+	}
 
 	// инициализируем и запускаем сервер HTTP
 	var server = http.Server{

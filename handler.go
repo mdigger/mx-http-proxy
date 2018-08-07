@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	"mx-http-proxy/mx"
+	"github.com/mdigger/mx-http-proxy/mx"
 
 	"github.com/mdigger/log"
 	"github.com/mdigger/rest"
