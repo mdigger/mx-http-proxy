@@ -43,7 +43,7 @@ func main() {
 	flag.StringVar(&mxhost, "mx", mxhost, "mx server `host`")
 	var httphost = flag.String("port", env("PORT", ":8000"),
 		"http server `port`")
-	var letsencrypt = flag.String("letsencrypt", env("LETSENCRYPT_HOSTS", ""),
+	var letsencrypt = flag.String("letsencrypt", env("LETSENCRYPT_HOST", ""),
 		"domain `host` name")
 	flag.Parse()
 	log.Info("service", logInfo) // выводим в лог информацию о версии сервиса
