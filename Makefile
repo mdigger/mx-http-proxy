@@ -1,8 +1,8 @@
-APPNAME ?= $(shell basename ${PWD})
+APPNAME := $(shell basename ${PWD})
 DATE	:= $(shell date -u +%FT%TZ)
 GIT		:= $(shell git rev-parse --short HEAD 2>/dev/null)
 TAG		:= $(shell git describe --tag 2>/dev/null) # --abbrev=0
-FLAGS   := -ldflags "-X main.version=$(TAG) -X main.commit=$(GIT) -X main.buildDate=$(DATE)"
+FLAGS   := -ldflags "-X main.version=$(TAG) -X main.commit=$(GIT) -X main.date=$(DATE)"
 MX      = 631hc.connector73.net
 
 .PHONY: info
@@ -49,10 +49,10 @@ docker-build: info
 
 .PHONY: docker-run
 docker-run:
-	docker run -p 8000:8000 \
+	docker run --rm -p 8000:8000 \
 	-e MX=$(MX) \
 	$(APPNAME) -log all,color
-	# --mount source=certs,target=/app \
+	# --mount source=cache,target=/letsEncrypt.cache \
 
 .PHONY: sertificates
 sertificates:

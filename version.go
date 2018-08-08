@@ -13,12 +13,12 @@ import (
 // Задаем название и метаданные описания проекта по умолчанию.
 // Для изменения этих значений на этапе сборки можно использовать возможность
 // передачи параметров компилятору:
-// 	-ldflags "-X main.version=$(VERSION) -X main.commit=$(GIT) -X main.buildDate=$(DATE)"
+// 	-ldflags "-X main.version=$(VERSION) -X main.commit=$(GIT) -X main.date=$(DATE)"
 var (
-	appName   = "MX-HTTP-Proxy"
-	version   string // версия приложения
-	commit    string // идентификатор коммита git
-	buildDate string // дата сборки
+	appName = "MX-HTTP-Proxy"
+	version string // версия приложения
+	commit  string // идентификатор коммита git
+	date    string // дата сборки
 
 	appAgent string      // используется как строка с именем сервиса
 	logInfo  []log.Field // информация о приложении для вывода в лог
@@ -33,9 +33,9 @@ func init() {
 		}
 		logInfo = append(logInfo, log.Field{Name: "version", Value: version})
 	}
-	if buildDate != "" {
-		var dateField = log.Field{Name: "build", Value: buildDate}
-		if d, _ := time.Parse(time.RFC3339, buildDate); !d.IsZero() {
+	if date != "" {
+		var dateField = log.Field{Name: "build", Value: date}
+		if d, _ := time.Parse(time.RFC3339, date); !d.IsZero() {
 			dateField.Value = d.Local().Format("2006-01-02T15:04")
 		}
 		logInfo = append(logInfo, dateField)

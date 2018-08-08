@@ -1,0 +1,28 @@
+builds:
+- env:
+  - CGO_ENABLED=0 # запретить сишный рантайм
+  hooks:
+    pre: go generate ./... # генератор статических файлов
+  goarch:
+    - amd64 # только 64-битные бинарники
+changelog:
+  sort: asc
+  filters:
+    exclude:
+    - '^doc:'
+    - '^test:'
+    - '^ignore:'
+git:
+  short_hash: true 
+release:
+  draft: true
+# Additional files/globs you want to add to the archive.
+# Defaults are any files matching `LICENCE*`, `LICENSE*`,
+# `README*` and `CHANGELOG*` (case-insensitive).
+# files:
+#   - LICENSE.txt
+#   - README.md
+#   - CHANGELOG.md
+#   - docs/*
+#   - design/*.png
+#   - templates/**/*
