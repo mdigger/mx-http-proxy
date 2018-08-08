@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 0.0.1
+  version: 0.5.0
   title: MX HTTP Proxy API
   description: |
     Выполнение команд через REST API на сервере [Zultys MX](https://www.zultys.com/zultys-cloud-services/).
@@ -173,9 +173,9 @@ paths:
         default:
           $ref: '#/components/responses/error'
 
-  /startMonitor:
+  /monitorStart:
     post:
-      operationId: StartMonitor
+      operationId: MonitorStart
       tags: [Events]
       description: >-
         Запуск серверного монитора позволяет отслеживать события о звонках.
@@ -183,7 +183,6 @@ paths:
         работа с голосовой почтой.
       requestBody:
         description: параметры для запуска монитора
-        required: true
         content:
           application/json:
             schema:
@@ -211,18 +210,20 @@ paths:
                 properties:
                   monitor:
                     type: integer
+                    format: int32
                     description: идентификатор монитора
                 example:
                   monitor: 1
         default:
           $ref: '#/components/responses/error'
-  /stopMonitor:
+  /monitorStop:
     post:
-      operationId: StopMonitor
+      operationId: MonitorStop
       tags: [Events]
       description: Останавливает ранее запущенный серверный монитор
       requestBody:
         description: параметры для остановки монитора
+        required: true
         content:
             application/json:
               schema:
@@ -232,6 +233,7 @@ paths:
                 properties:
                   monitor:
                     type: integer
+                    format: int32
                     description: идентификатор монитора
                 example:
                   monitor: 1
@@ -240,9 +242,9 @@ paths:
           $ref: '#/components/responses/204'
         default:
           $ref: '#/components/responses/error'
-  /startMonitorAb:
+  /monitorStartAb:
     post:
-      operationId: StartMonitorAb
+      operationId: MonitorStartAb
       tags: [Events]
       description: Запускает мониторинг изменений адресной книги
       responses:
@@ -250,9 +252,9 @@ paths:
           $ref: '#/components/responses/204'
         default:
           $ref: '#/components/responses/error'
-  /stopMonitorAb:
+  /monitorStopAb:
     post:
-      operationId: StopMonitorAb
+      operationId: MonitorStopAb
       tags: [Events]
       description: Останавливает мониторинг изменений адресной книги
       responses:
@@ -444,7 +446,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       diverting:
                         type: string
                         description: divertingDevice>deviceIdentifier
@@ -484,7 +486,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       alerting:
                         type: string
                         description: alertingDevice>deviceIdentifier
@@ -523,7 +525,7 @@ paths:
                       cads:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Cad'
+                          $ref: '#/components/schemas/cad'
                     example:
                       monitor: 1
                       call:
@@ -556,7 +558,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       answering:
                         type: string
                         description: answeringDevice>deviceIdentifier
@@ -589,7 +591,7 @@ paths:
                       cads:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Cad'
+                          $ref: '#/components/schemas/cad'
                     example:
                       monitor: 1
                       call:
@@ -619,7 +621,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       holding:
                         type: string
                         description: holdingDevice>deviceIdentifier
@@ -656,7 +658,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       available:
                         type: boolean
                         description: RecIsAvailable
@@ -682,7 +684,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       initiating:
                         type: string
                         description: initiatingDevice>deviceIdentifier
@@ -712,7 +714,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       releasing:
                         type: string
                         description: releasingDevice>deviceIdentifier
@@ -738,7 +740,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       calling:
                         type: string
                         description: callingDevice>deviceIdentifier
@@ -780,7 +782,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       network:
                         type: string
                         description: networkInterfaceUsed>deviceIdentifier
@@ -817,7 +819,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       calling:
                         type: string
                         description: callingDevice>deviceIdentifier
@@ -851,7 +853,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       retrieving:
                         type: string
                         description: retrievingDevice>deviceIdentifier
@@ -891,7 +893,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/Call'
+                        $ref: '#/components/schemas/callInfo'
                       transferring:
                         type: string
                         description: transferringDevice>deviceIdentifier
@@ -930,6 +932,70 @@ paths:
                     example:
                       monitor: 1
                       park: 3
+                  - title: callloginfo
+                    type: array
+                    description: callloginfo
+                    items:
+                      type: object
+                      required: [id]
+                      properties:
+                        id:
+                          type: integer
+                          description: record_id
+                        missed:
+                          type: boolean
+                          description: missed
+                        direction:
+                          type: string
+                          description: direction
+                        gcid:
+                          type: string
+                          description: gcid
+                        connectTimestamp:
+                          type: integer
+                          format: date-time
+                          description: connectTimestamp
+                        disconnectTimestamp:
+                          type: integer
+                          format: date-time
+                          description: disconnectTimestamp
+                        callingPartyNo:
+                          type: string
+                          description: callingPartyNo
+                        originalCalledPartyNo:
+                          type: string
+                          description: originalCalledPartyNo
+                        firstName:
+                          type: string
+                          description: firstName
+                        lastName:
+                          type: string
+                          description: lastName
+                        device:
+                          type: string
+                          description: extension
+                        serviceName:
+                          type: string
+                          description: serviceName
+                        serviceExtension:
+                          type: string
+                          description: serviceExtension
+                        callType:
+                          type: integer
+                          format: int32
+                          description: callType
+                        legType:
+                          type: integer
+                          format: int32
+                          description: legType
+                        selfLegType:
+                          type: integer
+                          format: int32
+                          description: selfLegType
+                        monitorType:
+                          type: integer
+                          format: int32
+                          description: monitorType
               example: |
                   event: presence
                   data: {"presence":"Available","status":"USER_ACCEPTS_IM","note":"Заметка к статусу"}
@@ -938,6 +1004,792 @@ paths:
                   data: {"monitor":1,"call":{"id":56,"device":"199"},"releasing":"199","cause":"normal"}
         default:
           $ref: '#/components/responses/error'
+
+  /makeCall:
+    post:
+      operationId: MakeCall
+      tags: [Calls]
+      description: Запускает дозвон на указанный номер или устройство
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [to]
+              properties:
+                device:
+                  type: string
+                  description: идентификатор устройства
+                  example: '234'
+                to:
+                  type: string
+                  description: телефонный номер или идентификатор устройства
+                  example: '79031744445'
+                group:
+                  type: string
+                  description: идентификатор группы
+                callerId:
+                  type: string
+                  description: идентификатор пользователя
+                callerName:
+                  type: string
+                  description: имя пользователя
+              example:
+                device: '243'
+                to: '79031744445'
+      responses:
+        '200':
+          description: возвращает идентификатор звонка
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [call]
+                properties:
+                  call:
+                    $ref: '#/components/schemas/call'
+                  calledDevice:
+                    type: string
+                    description: идентификатор устройства
+        default:
+          $ref: '#/components/responses/error'
+  /clearConnection:
+    post:
+      operationId: ClearConnection
+      tags: [Calls]
+      description: Отменяет или завершает звонок
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+              example:
+                call:
+                  id: 18
+                  device: '203'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /answerCall:
+    post:
+      operationId: AnswerCall
+      tags: [Calls]
+      description: Принимает входящий звонок
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+              example:
+                call:
+                  id: 18
+                  device: '203'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /holdCall:
+    post:
+      operationId: HoldCall
+      tags: [Calls]
+      description: Временно ставит звонок на паузу
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call, to]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+              example:
+                call:
+                  id: 18
+                  device: '203'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /parkCall:
+    post:
+      operationId: ParkCall
+      tags: [Calls]
+      description: Откладывает текущий звонок для дальнейшей передачи его на другое устройство
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call, to]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+              example:
+                call:
+                  id: 18
+                  device: '203'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /retriveCall:
+    post:
+      operationId: RetriveCall
+      tags: [Calls]
+      description: Восстанавливает отложенный или поставленный на паузу звонок
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call, to]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+              example:
+                call:
+                  id: 18
+                  device: '203'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /singleStepTranferCall:
+    post:
+      operationId: SingleStepTranferCall
+      tags: [Calls]
+      description: Перенаправляет звонок на другое устройство
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call, to]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+                to:
+                  type: string
+                  description: номер телефона или идентификатор устройства
+              example:
+                call:
+                  id: 18
+                  device: '203'
+                to: '79031744445'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /deflectCall:
+    post:
+      operationId: DeflectCall
+      tags: [Calls]
+      description: Перенаправляет звонок на другой номер или устройство
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call, to]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+                to:
+                  type: string
+                  description: идентификатор устройства
+              example:
+                call:
+                  id: 18
+                  device: '203'
+                to: '204'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /transferCall:
+    post:
+      operationId: TransferCall
+      tags: [Calls]
+      description: >-
+        Объединяет два звонка (активный и на паузе), соединяя абонентов друг с другом и 
+        исключая текущего пользователя.
+      requestBody:
+        description: параметры звонков
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [heldCall, activeCall]
+              properties:
+                heldCall: 
+                  $ref: '#/components/schemas/call'
+                activeCall:
+                  $ref: '#/components/schemas/call'
+              example:
+                heldCall:
+                  id: 18
+                  device: '203'
+                activeCall:
+                  id: 19
+                  device: '204'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /getCallLog:
+    post:
+      operationId: GetCallLog
+      tags: [Calls]
+      description: Запрашивает получение лога звонков. Сам лог возвращается в виде событий `callloginfo`.
+      requestBody:
+        description: параметры запроса
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timestamp:
+                  type: integer
+                  default: -1
+                  description: возвращать только записи старше указанного времени
+                  example: 1532848385
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /assignDevice:
+    post:
+      operationId: AssignDevice
+      tags: [Calls]
+      description: Назначает новое устройство пользователя
+      requestBody:
+        description: параметры запроса
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                device:
+                  type: object
+                  description: описание устройства
+                  required: [name]
+                  properties:
+                    name:
+                      type: string
+                      description: имя устройства
+                      example: dm
+                    type:
+                      type: string
+                      description: тип устройства
+                      example: address
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /setCallMode:
+    post:
+      operationId: SetCallMode
+      tags: [Calls]
+      description: Изменяет режим звонка
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                mode:
+                  type: string
+                  enum: [local, remote]
+                  default: local
+                  description: режим устройства
+                  example: remote
+                ringDelay:
+                  type: integer
+                  format: int32
+                  default: 20
+                  description: задержка перед звонком
+                vmDelay:
+                  type: integer
+                  format: int32
+                  default: 10
+                  description: задержка перед переходом на голосовую почту
+                device:
+                  type: string
+                  description: имя устройства
+                  example: dm
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /startRecording:
+    post:
+      operationId: StartRecording
+      tags: [Calls]
+      description: Запускает запись звонка
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+                group:
+                  type: string
+                  description: идентификатор группы
+              example:
+                call:
+                  id: 18
+                  device: '203'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /stopRecording:
+    post:
+      operationId: StopRecording
+      tags: [Calls]
+      description: Останавливает запись звонка
+      requestBody:
+        description: параметры звонка
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [call]
+              properties:
+                call: 
+                  $ref: '#/components/schemas/call'
+                group:
+                  type: string
+                  description: идентификатор группы
+              example:
+                call:
+                  id: 18
+                  device: '203'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+
+  /vmGetList:
+    post:
+      operationId: VMGetList
+      tags: [VoiceMail]
+      description: Получение списка голосовых сообщений
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                user:
+                  type: string
+                  description: уникальный идентификатор пользователя
+                  example: '43892780322813134'
+                mediaType:
+                  type: string
+                  description: тип данных
+                  enum: [VoiceMail, Recording, Fax, Undefined]
+                  default: VoiceMail
+      responses:
+        '200':
+          description: список файлов с голосовой почтой или записыми звонков
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, from, to, received]
+                  properties:
+                    id:
+                      type: integer
+                      description: уникальный идентификатор
+                    from:
+                      type: string
+                      description: от кого
+                    fromName:
+                      type: string
+                      description: имя отправителя
+                    callerName:
+                      type: string
+                      description: отправитель
+                    to:
+                      type: string
+                      description: кому
+                    ownerType:
+                      type: string
+                      description: тип владельца
+                    mediaType:
+                      type: string
+                      enum: [VoiceMail, Recording, Fax, Undefined]
+                      default: VoiceMail
+                      description: тип данных
+                    received:
+                      type: integer
+                      format: date-time
+                      description: дата и время приема
+                    duration:
+                      type: integer
+                      format: int32
+                      description: длительность
+                    read:
+                      type: boolean
+                      description: флаг прочитанности
+                    note:
+                      type: string
+                      description: текст заметки
+                example:
+                  - id: 1656
+                    from: '272'
+                    fromName": 'first last'
+                    callerName: '272'
+                    to: '273'
+                    ownerType: user
+                    received: 1532833620
+                    duration: 8
+                  - id: 1657
+                    from: '271'
+                    fromName": 'Test User'
+                    callerName: '271'
+                    to: '273'
+                    ownerType: user
+                    received: 1532840804
+                    duration: 1200
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /vmDelete:
+    post:
+      operationId: VMDelete
+      tags: [VoiceMail]
+      description: Удаление голосового сообщения
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                user:
+                  type: string
+                  description: уникальный идентификатор пользователя
+                  example: '43892780322813134'
+                id:
+                  type: integer
+                  format: int32
+                  description: идентификатор голосового сообщения
+                  example: 128
+                mediaType:
+                  type: string
+                  description: тип данных
+                  enum: [VoiceMail, Recording, Fax, Undefined]
+                  default: VoiceMail
+
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /vmSetStatus:
+    post:
+      operationId: VMSetStatus
+      tags: [VoiceMail]
+      description: Изменение флага прочитанности
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                user:
+                  type: string
+                  description: уникальный идентификатор пользователя
+                  example: '43892780322813134'
+                id:
+                  type: integer
+                  description: идентификатор голосового сообщения
+                  example: 128
+                mediaType:
+                  type: string
+                  description: тип данных
+                  enum: [VoiceMail, Recording, Fax, Undefined]
+                  default: VoiceMail
+                read:
+                  type: boolean
+                  description: флаг прочитанности
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /vmUpdateNote:
+    post:
+      operationId: VMUpdateNote
+      tags: [VoiceMail]
+      description: Изменение текста заметки голосового сообщения
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                  description: идентификатор голосового сообщения
+                  example: 128
+                mediaType:
+                  type: string
+                  description: тип данных
+                  enum: [VoiceMail, Recording, Fax, Undefined]
+                  default: VoiceMail
+                note:
+                  type: string
+                  description: текст заметки
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /vmReceive:
+    post:
+      operationId: VMReceive
+      tags: [VoiceMail]
+      description: Получение файла с голосовой почтой
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id]
+              properties:
+                id:
+                  type: integer
+                  format: int32
+                  description: идентификатор голосового сообщения
+                  example: 128
+                mediaType:
+                  type: string
+                  description: тип данных
+                  enum: [VoiceMail, Recording, Fax, Undefined]
+                  default: VoiceMail
+      responses:
+        '200':
+          description: файл с голосовой почтой
+          content:
+            audio/wave:
+              schema:
+                type: string
+                format: binary
+                description: содержимое файла
+        default:
+          $ref: '#/components/responses/error'
+
+  /getAddressBook:
+    post:
+      operationId: GetAddressBook
+      tags: [Services]
+      description: Отдает информацию о контактах, зарегистрированных на сервере MX
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sort:
+                  type: string
+                  enum: [last, first]
+                  default: last
+                  description: режим сортировки контактов (по фамилии или имени)
+      responses:
+        '200':
+          description: список контаков
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, device]
+                  properties:
+                    id:
+                      type: string
+                      description: уникальный идентификатор
+                    device:
+                      type: string
+                      description: внутренний телефон (устройство)
+                    firstName:
+                      type: string
+                      description: имя
+                    lastName:
+                      type: string
+                      description: фамилия
+                    homePhone:
+                      type: string
+                      description: номер домашнего телефона
+                    cellPhone:
+                      type: string
+                      description: номер мобильного телефона
+                    email:
+                      type: string
+                      format: email
+                      description: email
+                    homeSystem:
+                      type: string
+                      description: уникальный идентификатор [???]
+                    did:
+                      type: string
+                      description: '[???]'
+                    exchangeId:
+                      type: string
+                      description: идентификатор пользователя в MS Exchange
+                example:
+                  - jid: '43892780838802510'
+                    device: '296'
+                    firstName: Test
+                    lastName: Apple
+                  - jid: '43892780541311342'
+                    device: '299'
+                    firstName: Maxim
+                    lastName: Donchenko
+                    cellPhone: '+37256847584'
+                    email: maximd@xyzrd.com
+                  - jid: '43892780722835390'
+                    device: '295'
+                    firstName: Muhammet
+                    lastName: Madraimov
+                  - jid: '43892780920507627'
+                    device: '294'
+                    firstName: Dmitry
+                    lastName: Sedykh
+                    cellPhone: '+79031744445'
+                    email: dmitrys@xyzrd.com
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /getServiceList:
+    post:
+      operationId: GetServiceList
+      tags: [Services]
+      description: Получение списка настроек сервисов
+      responses:
+        '200':
+          description: список настроек сервисов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required: [id, name, type, device]
+                  properties:
+                    id:
+                      type: string
+                      description: уникальный идентификатор
+                    name:
+                      type: string
+                      description: название сервиса
+                    type:
+                      type: string
+                      description: тип
+                    device:
+                      type: string
+                      description: идентификатор устройства
+                    homeSystem:
+                      type: string
+                      description: '[???]'
+                example:
+                  - id: '3458764514634960449'
+                    name: park
+                    type: ParkServer
+                    device: '*77'
+                  - id: '3502657293077671189'
+                    name: Default
+                    type: AA
+                    device: '201'
+                  - id: '3458764515733933107'
+                    name: bind
+                    type: BindServer
+                    device: '*27'
+                  - id: '3458764514472757356'
+                    name: voicemail
+                    type: VM
+                    device: '*86'
+                  - id: '3502657293164177462'
+                    name: WaitFor
+                    type: AA
+                    device: '204'
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+
+tags:
+  - name: Authorization
+    description: Подключение к MX
+  - name: Events
+    description: Серверные события и их мониторинг
+  - name: Calls
+    description: Работа со звонками
+  - name: VoiceMail
+    description: Голосовые сообщения, записи звонков, факсы
+  - name: Services
+    description: Работа с сервисами MX
 
 components:
   securitySchemes:
@@ -961,7 +1813,23 @@ components:
         [HTTP Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
 
   schemas:
-    Call:
+    call:
+      title: call
+      type: object
+      description: Описывает информацию о звонке
+      required: [id, device]
+      properties:
+        id: 
+          type: integer
+          format: int32
+          description: callID
+        device:
+          type: string
+          description: deviceID
+      example:
+        id: 18
+        device: '234'
+    callInfo:
       title: call
       type: object
       description: Описывает информацию о звонке
@@ -980,7 +1848,7 @@ components:
       example:
         id: 18
         device: '234'
-    Cad:
+    cad:
       title: cad
       type: object
       required: [name, type, value]

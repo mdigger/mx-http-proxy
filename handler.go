@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"mime"
 	"net/http"
 	"strings"
 	"sync"
@@ -119,6 +120,12 @@ func (l *Conns) Logout(c *rest.Context) error {
 	return nil   // ответ не требуется
 }
 
+func init() {
+	// регистрируем mimetype для указанного расширения, чтобы IE корректно
+	// мог его проигрывать, потому что стандартный тип для него - audio/x-wav.
+	mime.AddExtensionType(".wav", "audio/wave")
+}
+
 // Commands обрабатывает команды к серверу MX.
 func (l *Conns) Commands(c *rest.Context) error {
 	// авторизуемся и получаем соединение из списка
@@ -141,6 +148,67 @@ func (l *Conns) Commands(c *rest.Context) error {
 	case "monitorStopAb":
 		cmd = new(MonitorStopAbRequest)
 		resp = new(NamedResponse)
+	case "makeCall":
+		cmd = new(MakeCall) // используется хак для формирования XML
+		resp = new(MakeCallResponse)
+	case "clearConnection":
+		cmd = new(ClearConnection)
+		resp = new(NamedResponse)
+	case "answerCall":
+		cmd = new(AnswerCall)
+		resp = new(NamedResponse)
+	case "holdCall":
+		cmd = new(HoldCall)
+		resp = new(NamedResponse)
+	case "parkCall":
+		cmd = new(ParkCall)
+		resp = new(NamedResponse)
+	case "retriveCall":
+		cmd = new(RetrieveCall)
+		resp = new(NamedResponse)
+	case "singleStepTranferCall":
+		cmd = new(SingleStepTransferCall)
+		resp = new(SingleStepTransferCallResponse)
+	case "deflectCall":
+		cmd = new(DeflectCall)
+		resp = new(NamedResponse)
+	case "transferCall":
+		cmd = new(TransferCall)
+		resp = new(NamedResponse)
+	case "getCallLog":
+		cmd = &GetCallLog{Type: "get", ID: "calllog", Timestamp: -1}
+	case "assignDevice":
+		cmd = new(AssignDevice)
+		resp = new(NamedResponse)
+	case "setCallMode":
+		cmd = &SetCallMode{Type: "set", ID: "mode", Mode: "local",
+			RingDelay: 20, VMDelay: 10}
+	case "startRecording":
+		cmd = new(StartRecording)
+		resp = new(NamedResponse)
+	case "stopRecording":
+		cmd = new(StopRecording)
+		resp = new(NamedResponse)
+	case "vmGetList":
+		cmd = new(MailGetListIncoming)
+		resp = new(MailGetListIncomingResponse)
+	case "vmDelete":
+		cmd = new(MailDeleteIncoming)
+		resp = new(NamedResponse)
+	case "vmSetStatus":
+		cmd = new(MailSetStatus)
+		resp = new(NamedResponse)
+	case "vmUpdateNote":
+		cmd = new(UpdateVMNote)
+		resp = new(NamedResponse)
+	case "vmReceive":
+		cmd = new(MailReceiveIncoming)
+		resp = new(VMChunk)
+	case "getAddressBook":
+		cmd = &GetAddressBook{Type: "get", ID: "addressbook"}
+	case "getServiceList":
+		cmd = new(GetServiceList)
+		resp = new(Services)
 
 	default:
 		return c.Error(http.StatusNotFound,
@@ -160,7 +228,102 @@ func (l *Conns) Commands(c *rest.Context) error {
 	switch obj := resp.(type) {
 	case *NamedResponse:
 		resp = nil // для пустого ответа ничего не возвращаем
-		_ = obj
+	case *MailGetListIncomingResponse:
+		if len(obj.Mails) > 0 {
+			resp = obj.Mails // отдаем только список голосовой почты
+		} else {
+			resp = nil
+		}
+	case *Services:
+		if len(obj.Services) > 0 {
+			resp = obj.Services // отдаем только список сервисов
+		} else {
+			resp = nil
+		}
+	case *VMChunk:
+		// формируем строку с описанием типа содержимого
+		var mimetype = mime.TypeByExtension("." + obj.Format)
+		if mimetype == "" {
+			mimetype = "application/octet-stream"
+		}
+		c.SetHeader("Content-Type", mimetype)
+		c.SetHeader("Content-Disposition",
+			fmt.Sprintf("attachment; filename=%q", obj.Name))
+		// разрешаем отдавать ответ кусочками
+		c.AllowMultiple = true
+		// формируем команду для получения следующей порции файла
+		var next = &struct {
+			*MailReceiveIncoming
+			Next string `xml:"nextChunk"`
+		}{
+			MailReceiveIncoming: cmd.(*MailReceiveIncoming),
+		}
+		var done = c.Request.Context().Done() // для отслеживания закрытия
+	nextChunk:
+		data, err := obj.Decode() // декодируем полученные данные
+		if err != nil {
+			log.Error("vmChunk decode error", err)
+			return c.Error(http.StatusInternalServerError,
+				"vmChunk decode error")
+		}
+		select {
+		default: // отдаем кусочек данных пользователю
+			// отсылаем кусок данных в ответ
+			if err = c.Write(data); err != nil {
+				log.Error("response vmChunk error", err)
+				return c.Error(http.StatusInternalServerError,
+					"Response vmChunk error")
+			}
+		case <-done: // пользователь закрыл соединение
+			// отменяем загрузку данных
+			if err = conn.Send(&MailCancelReceive{
+				MailID:    next.MailID,
+				MediaType: next.MediaType,
+			}, new(NamedResponse)); err != nil {
+				return httpError(err)
+			}
+			if err := c.Request.Context().Err(); err != nil {
+				log.Error("response error", err)
+			}
+			return nil
+		}
+		// проверяем, что это не последний блок
+		if obj.Number < obj.Total {
+			// отсылаем команду на сервер для получения следующего блока
+			if err := conn.Send(next, obj); err != nil {
+				return httpError(err)
+			}
+			goto nextChunk // повторяем разбор и отдачу данных
+		}
+		return nil // ответ уже отослан
+	case nil:
+		switch obj := cmd.(type) {
+		case *GetAddressBook: // адресная книга
+			var contacts []*Contact // адресная книга
+			var ablist = new(ABList)
+		getAddressBook:
+			// ожидаем события ablist от сервера MX со списком контактов
+			if err := conn.WaitEvent("ablist", ablist); err != nil {
+				return httpError(err)
+			}
+			// инициализируем адресную книгу
+			if contacts == nil {
+				contacts = make([]*Contact, 0, ablist.Size)
+			}
+			// заполняем адресную книгу полученными контактами
+			contacts = append(contacts, ablist.Contacts...)
+			// проверяем, что получена вся адресная книга
+			if (ablist.Index+1)*50 < ablist.Size {
+				// увеличиваем номер для получения следующей порции контактов
+				obj.Index = ablist.Index + 1
+				// отправляем запрос на получение следующей порции
+				if err := conn.Send(obj, nil); err != nil {
+					return httpError(err)
+				}
+				goto getAddressBook // запрашиваем следующую порцию контактов
+			}
+			resp = contacts // возвращаем контакты
+		}
 	}
 
 	return c.Write(resp) // возвращаем ответ

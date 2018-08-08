@@ -84,6 +84,8 @@ func (c *Conn) reading() {
 			name = "TransferredEvent" // исправляем ошибку в написании
 		case "callParkInfo":
 			obj = new(ParkedEvent)
+		case "callloginfo":
+			obj = new(CallLoginfo)
 		default:
 			log.Warn("unsupported event", "name", name)
 			continue
