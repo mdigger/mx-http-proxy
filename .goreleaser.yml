@@ -16,8 +16,6 @@ git:
   short_hash: true 
 release:
   draft: true
-docker:
-  skip_push: true
 # Additional files/globs you want to add to the archive.
 # Defaults are any files matching `LICENCE*`, `LICENSE*`,
 # `README*` and `CHANGELOG*` (case-insensitive).
