@@ -1,15 +1,15 @@
-ARG VERSION="develop"
-ARG COMMIT
-ARG DATE
+ARG version="develop"
+ARG commit
+ARG date
 ARG LOG
 ARG MX
 ARG PORT="8000"
 
 # FROM golang:rc-alpine AS builder
 FROM golang:alpine AS builder
-ARG VERSION
-ARG COMMIT
-ARG DATE
+ARG version
+ARG commit
+ARG date
 RUN ["apk", "--no-cache", "add", "git"]
 WORKDIR /go/src/github.com/mdigger/mx-http-proxy
 COPY . .
@@ -17,13 +17,13 @@ RUN ["go", "get", "-d", "github.com/shurcooL/vfsgen", \
 "github.com/shurcooL/httpfs/filter", "./..."]
 RUN ["go", "generate"]
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
-ENV ldflags="-w -s -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}"
+ENV ldflags="-w -s -X main.version=${version} -X main.commit=${commit} -X main.date=${date}"
 RUN go install -i -ldflags "${ldflags}" -a -installsuffix cgo ./...
 
 FROM scratch
-ARG VERSION
-ARG COMMIT
-ARG DATE
+ARG version
+ARG commit
+ARG date
 ARG LOG
 ARG MX
 ARG PORT

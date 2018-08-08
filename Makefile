@@ -42,9 +42,9 @@ docker: | docker-build docker-run
 docker-build: info
 	docker build -t $(APPNAME) \
 	--no-cache \
-	--build-arg VERSION=$(TAG) \
-	--build-arg COMMIT=$(GIT) \
-	--build-arg DATE=$(DATE) \
+	--build-arg version=$(TAG) \
+	--build-arg commit=$(GIT) \
+	--build-arg date=$(DATE) \
 	.
 
 .PHONY: docker-run
