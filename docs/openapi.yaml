@@ -39,7 +39,7 @@ security:
 paths:
   /login:
     post:
-      operationId: Login
+      operationId: login
       tags: [Authorization]
       description: >-
         Осуществляет подключение к серверу MX и авторизует пользователя.
@@ -162,7 +162,7 @@ paths:
           $ref: '#/components/responses/error'
   /logout:
     post:
-      operationId: Logout
+      operationId: logout
       tags: [Authorization]
       description: >-
         Завершает сессию и отключается от сервера MX. Авторизационный токен после 
@@ -175,7 +175,7 @@ paths:
 
   /monitorStart:
     post:
-      operationId: MonitorStart
+      operationId: monitorStart
       tags: [Events]
       description: >-
         Запуск серверного монитора позволяет отслеживать события о звонках.
@@ -218,7 +218,7 @@ paths:
           $ref: '#/components/responses/error'
   /monitorStop:
     post:
-      operationId: MonitorStop
+      operationId: monitorStop
       tags: [Events]
       description: Останавливает ранее запущенный серверный монитор
       requestBody:
@@ -244,7 +244,7 @@ paths:
           $ref: '#/components/responses/error'
   /monitorStartAb:
     post:
-      operationId: MonitorStartAb
+      operationId: monitorStartAb
       tags: [Events]
       description: Запускает мониторинг изменений адресной книги
       responses:
@@ -254,7 +254,7 @@ paths:
           $ref: '#/components/responses/error'
   /monitorStopAb:
     post:
-      operationId: MonitorStopAb
+      operationId: monitorStopAb
       tags: [Events]
       description: Останавливает мониторинг изменений адресной книги
       responses:
@@ -265,7 +265,7 @@ paths:
 
   /events:
     post:
-      operationId: Events
+      operationId: events
       tags: [Events]
       description: | 
         Отдает информацию о серверных событиях в формате 
@@ -1007,7 +1007,7 @@ paths:
 
   /makeCall:
     post:
-      operationId: MakeCall
+      operationId: makeCall
       tags: [Calls]
       description: Запускает дозвон на указанный номер или устройство
       requestBody:
@@ -1057,7 +1057,7 @@ paths:
           $ref: '#/components/responses/error'
   /clearConnection:
     post:
-      operationId: ClearConnection
+      operationId: clearConnection
       tags: [Calls]
       description: Отменяет или завершает звонок
       requestBody:
@@ -1082,7 +1082,7 @@ paths:
           $ref: '#/components/responses/error'
   /answerCall:
     post:
-      operationId: AnswerCall
+      operationId: answerCall
       tags: [Calls]
       description: Принимает входящий звонок
       requestBody:
@@ -1107,7 +1107,7 @@ paths:
           $ref: '#/components/responses/error'
   /holdCall:
     post:
-      operationId: HoldCall
+      operationId: holdCall
       tags: [Calls]
       description: Временно ставит звонок на паузу
       requestBody:
@@ -1132,7 +1132,7 @@ paths:
           $ref: '#/components/responses/error'
   /parkCall:
     post:
-      operationId: ParkCall
+      operationId: parkCall
       tags: [Calls]
       description: Откладывает текущий звонок для дальнейшей передачи его на другое устройство
       requestBody:
@@ -1157,7 +1157,7 @@ paths:
           $ref: '#/components/responses/error'
   /retriveCall:
     post:
-      operationId: RetriveCall
+      operationId: retriveCall
       tags: [Calls]
       description: Восстанавливает отложенный или поставленный на паузу звонок
       requestBody:
@@ -1182,7 +1182,7 @@ paths:
           $ref: '#/components/responses/error'
   /singleStepTranferCall:
     post:
-      operationId: SingleStepTranferCall
+      operationId: singleStepTranferCall
       tags: [Calls]
       description: Перенаправляет звонок на другое устройство
       requestBody:
@@ -1211,7 +1211,7 @@ paths:
           $ref: '#/components/responses/error'
   /deflectCall:
     post:
-      operationId: DeflectCall
+      operationId: deflectCall
       tags: [Calls]
       description: Перенаправляет звонок на другой номер или устройство
       requestBody:
@@ -1240,7 +1240,7 @@ paths:
           $ref: '#/components/responses/error'
   /transferCall:
     post:
-      operationId: TransferCall
+      operationId: transferCall
       tags: [Calls]
       description: >-
         Объединяет два звонка (активный и на паузе), соединяя абонентов друг с другом и 
@@ -1272,7 +1272,7 @@ paths:
           $ref: '#/components/responses/error'
   /getCallLog:
     post:
-      operationId: GetCallLog
+      operationId: getCallLog
       tags: [Calls]
       description: Запрашивает получение лога звонков. Сам лог возвращается в виде событий `callloginfo`.
       requestBody:
@@ -1294,7 +1294,7 @@ paths:
           $ref: '#/components/responses/error'
   /assignDevice:
     post:
-      operationId: AssignDevice
+      operationId: assignDevice
       tags: [Calls]
       description: Назначает новое устройство пользователя
       requestBody:
@@ -1325,7 +1325,7 @@ paths:
           $ref: '#/components/responses/error'
   /setCallMode:
     post:
-      operationId: SetCallMode
+      operationId: setCallMode
       tags: [Calls]
       description: Изменяет режим звонка
       requestBody:
@@ -1362,7 +1362,7 @@ paths:
           $ref: '#/components/responses/error'
   /startRecording:
     post:
-      operationId: StartRecording
+      operationId: startRecording
       tags: [Calls]
       description: Запускает запись звонка
       requestBody:
@@ -1390,7 +1390,7 @@ paths:
           $ref: '#/components/responses/error'
   /stopRecording:
     post:
-      operationId: StopRecording
+      operationId: stopRecording
       tags: [Calls]
       description: Останавливает запись звонка
       requestBody:
@@ -1419,7 +1419,7 @@ paths:
 
   /vmGetList:
     post:
-      operationId: VMGetList
+      operationId: vmGetList
       tags: [VoiceMail]
       description: Получение списка голосовых сообщений
       requestBody:
@@ -1508,7 +1508,7 @@ paths:
           $ref: '#/components/responses/error'
   /vmDelete:
     post:
-      operationId: VMDelete
+      operationId: vmDelete
       tags: [VoiceMail]
       description: Удаление голосового сообщения
       requestBody:
@@ -1541,7 +1541,7 @@ paths:
           $ref: '#/components/responses/error'
   /vmSetStatus:
     post:
-      operationId: VMSetStatus
+      operationId: vmSetStatus
       tags: [VoiceMail]
       description: Изменение флага прочитанности
       requestBody:
@@ -1575,7 +1575,7 @@ paths:
           $ref: '#/components/responses/error'
   /vmUpdateNote:
     post:
-      operationId: VMUpdateNote
+      operationId: vmUpdateNote
       tags: [VoiceMail]
       description: Изменение текста заметки голосового сообщения
       requestBody:
@@ -1606,7 +1606,7 @@ paths:
           $ref: '#/components/responses/error'
   /vmReceive:
     post:
-      operationId: VMReceive
+      operationId: vmReceive
       tags: [VoiceMail]
       description: Получение файла с голосовой почтой
       requestBody:
@@ -1641,7 +1641,7 @@ paths:
 
   /getAddressBook:
     post:
-      operationId: GetAddressBook
+      operationId: getAddressBook
       tags: [Services]
       description: Отдает информацию о контактах, зарегистрированных на сервере MX
       requestBody:
@@ -1724,7 +1724,7 @@ paths:
           $ref: '#/components/responses/error'
   /getServiceList:
     post:
-      operationId: GetServiceList
+      operationId: getServiceList
       tags: [Services]
       description: Получение списка настроек сервисов
       responses:
@@ -1807,7 +1807,7 @@ components:
 
             Authorization: Bearer LRSO4vGDdyLA6UQl
 
-        В качестве альтернативы, токен авторизации можно передавать не в заголовке, а
+        В качестве альтернативы токен авторизации можно передавать не в заголовке, а
         в виде параметра запроса `?access_token=...`. Данный подход можно использовать,
         например, при создании запроса на получение событий сервера MX с помощью 
         [HTTP Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
