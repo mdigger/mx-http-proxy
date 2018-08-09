@@ -117,7 +117,6 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 		ErrorLog:          httplogger.StdLog(log.ERROR),
 	}
-	var tlsCertificates []tls.Certificate // загруженные и разобранные сертификаты
 	// настраиваем автоматическое получение сертификата
 	if *letsencrypt != "" {
 		if *letsencrypt == "localhost" || net.ParseIP(*letsencrypt) != nil {
@@ -150,26 +149,46 @@ func main() {
 			"tls", true,
 			"host", *letsencrypt,
 		)
-	} else if tlsCertificates != nil {
-		server.TLSConfig = &tls.Config{
-			MinVersion:   tls.VersionTLS12,
-			Certificates: tlsCertificates,
-		}
-		server.TLSConfig.BuildNameToCertificate()
-		var hosts = make([]string, 0, len(server.TLSConfig.NameToCertificate))
-		for name := range server.TLSConfig.NameToCertificate {
-			hosts = append(hosts, name)
-		}
-		httplogger.Info("server with tls certificate",
-			"listen", server.Addr,
-			"tls", true,
-			"hosts", hosts,
-		)
 	} else {
-		httplogger.Info("server",
-			"listen", server.Addr,
-			"tls", false,
-		)
+		// проверяем, что есть локальные сертификаты и загружаем их
+		keys, err := filepath.Glob(filepath.Join(".", "certs", "*.key"))
+		if err != nil {
+			panic(err)
+		}
+		// если есть сертификаты, то добавляем их
+		if len(keys) > 0 {
+			keys, err := filepath.Glob(filepath.Join(".", "certs", "*.key"))
+			if err != nil {
+				panic(err) // ошибка может возникнуть только при ошибку в шаблоне
+			}
+			var certificates = make([]tls.Certificate, 0, len(keys))
+			// перебираем все найденные файлы
+			for _, keyfile := range keys {
+				// загружаем пару файлов с сертификатами
+				cert, err := tls.LoadX509KeyPair(keyfile[:len(keyfile)-3]+"crt", keyfile)
+				if err != nil {
+					continue
+				}
+				certificates = append(certificates, cert)
+			}
+			var tlsConfig = &tls.Config{Certificates: certificates}
+			tlsConfig.BuildNameToCertificate()
+			var hosts = make([]string, 0, len(tlsConfig.NameToCertificate))
+			for name := range tlsConfig.NameToCertificate {
+				hosts = append(hosts, name)
+			}
+			server.TLSConfig = tlsConfig // используем сертификаты
+			httplogger.Info("server with tls certificate",
+				"listen", server.Addr,
+				"tls", true,
+				"hosts", hosts,
+			)
+		} else {
+			httplogger.Info("server",
+				"listen", server.Addr,
+				"tls", false,
+			)
+		}
 	}
 	// отслеживаем сигнал о прерывании и останавливаем по нему сервер
 	go func() {
@@ -180,7 +199,15 @@ func main() {
 			httplogger.Error("server shutdown", err)
 		}
 	}()
-	if err := server.ListenAndServe(); err != http.ErrServerClosed {
+	// в зависимости от того, поддерживаются сертификаты или нет, запускается
+	// разная версию веб-сервера
+	var err error
+	if server.TLSConfig != nil {
+		err = server.ListenAndServeTLS("", "")
+	} else {
+		err = server.ListenAndServe()
+	}
+	if err != http.ErrServerClosed {
 		httplogger.Error("server", err)
 	} else {
 		httplogger.Info("server stopped")

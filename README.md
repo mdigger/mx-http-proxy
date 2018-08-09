@@ -119,6 +119,25 @@ Content-Length: 180
     21:53:01.821825 TRACE [mx]: dmtest3: <presence from="0" status="Available" mxStatus=""></presence>
     21:53:01.822540 DEBUG sse user=dmtest3 event=presence data={"presence":"Available"}
 
+## Локальные сертификаты
+
+Если в каталоге `./certs/` найдены пары сертификатов (`cert.key` и `cert.crt`), то они будут автоматически загружены и использованы веб-сервером для поддержки HTTPS. Таких пар сертификатов может быть несколько.
+
+Это могут быть и самоподписанные сертификаты. Например, для создания сертификата для `localhost` можно воспользоваться следующей командой:
+
+    openssl req -x509 -out localhost.crt -keyout localhost.key \
+	    -newkey rsa:2048 -nodes -sha256 \
+	    -subj '/CN=localhost' -extensions EXT -config <( \
+	    printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
+
+**Внимание:** в этом случае необходимо явно указывать, что используется протокол `https`:
+
+    $ curl https://localhost:8000/ -k
+
 ## Поддержка Docker
 
-Кроме описанных выше параметров, сборка в Docker может потребовать подключения хранилища для кеша сертификатов `/letsEncrypt.cache` и/или хранилища сертификатов `/certs`.
+Данный сервис доступен в виде образов Docker:
+
+    docker pull mdigger/mx-http-proxy:latest
+
+Кроме описанных выше параметров, сборка в Docker может потребовать подключения хранилища для кеша сертификатов `/letsEncrypt.cache` и/или хранилища сертификатов `/certs`. В последнем случае сертификаты из каталога будут автоматически загружены и сервер будет отвечать исключительно по протоколу `https://`.
