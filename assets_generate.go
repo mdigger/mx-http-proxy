@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	var fs http.FileSystem = filter.Keep(http.Dir("docs"),
+	var fs http.FileSystem = filter.Keep(http.Dir("www"),
 		FilesWithExtensions(".yaml", ".html", ".ico", ".png", ".xml", ".json"))
 
 	err := vfsgen.Generate(fs, vfsgen.Options{BuildTags: "!dev"})
