@@ -1,6 +1,6 @@
 before:
   hooks:
-    pre: go generate ./... # генератор статических файлов
+    - go generate ./... # генератор статических файлов
 builds:
 - env:
   - CGO_ENABLED=0 # запретить сишный рантайм
