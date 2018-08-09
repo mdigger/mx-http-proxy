@@ -139,6 +139,10 @@ Content-Length: 180
 
 Данный сервис доступен в виде образов Docker:
 
-    docker pull mdigger/mx-http-proxy:latest
+    $ docker pull mdigger/mx-http-proxy
+    $ docker run --rm \
+        -p 8000:8000 \
+        -e MX=631hc.connector73.net \
+        mdigger/mx-http-proxy -log all,color
 
 Кроме описанных выше параметров, сборка в Docker может потребовать подключения хранилища для кеша сертификатов `/letsEncrypt.cache` и/или хранилища сертификатов `/certs`. В последнем случае сертификаты из каталога будут автоматически загружены и сервер будет отвечать исключительно по протоколу `https://`.
