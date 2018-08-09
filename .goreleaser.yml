@@ -1,8 +1,9 @@
+before:
+  hooks:
+    pre: go generate ./... # генератор статических файлов
 builds:
 - env:
   - CGO_ENABLED=0 # запретить сишный рантайм
-  hooks:
-    pre: go generate ./... # генератор статических файлов
   goarch:
     - amd64 # только 64-битные бинарники
 changelog:
