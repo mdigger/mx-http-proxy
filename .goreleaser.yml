@@ -18,8 +18,13 @@ release:
   draft: true
 dockers:
   - image: mdigger/mx-http-proxy
-    latest: true
-    skip_push: true
+    skip_push: false
+    dockerfile: goreleaser.Dockerfile
+    tag_templates:
+      - '{{ .Tag }}'
+      - 'v{{ .Major }}.{{ .Minor }}'
+      - 'latest'
+
 # Additional files/globs you want to add to the archive.
 # Defaults are any files matching `LICENCE*`, `LICENSE*`,
 # `README*` and `CHANGELOG*` (case-insensitive).
