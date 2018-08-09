@@ -189,7 +189,7 @@ func main() {
 
 // печатает информацию о содержимом контейнера
 // используется для отладки
-func init() {
+func info() {
 	if !isDocker() {
 		return
 	}
@@ -211,7 +211,7 @@ func init() {
 		fmt.Printf("- %s\n", env)
 	}
 
-	// readFile("/etc/hosts")
+	readFile("/etc/ssl/certs/ca-certificates.crt")
 	// readFile("/etc/passwd")
 
 	fmt.Println("files:")
