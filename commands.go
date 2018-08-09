@@ -289,6 +289,27 @@ type (
 		XMLName xml.Name `xml:"SnapshotDevice" json:"-"`
 		Object  string   `xml:"snapshotObject" json:"device"`
 	}
+
+	// GetAgentState command provides information about specified Agent roles.
+	GetAgentState struct {
+		XMLName xml.Name `xml:"GetAgentState" json:"-"`
+		Device  string   `xml:"device" json:"device"`
+	}
+	// GetAgentStateResponse описывает ответ с соотоянием агента. Возвращает
+	// в ответ на запрос GetAgentState.
+	GetAgentStateResponse struct {
+		LoggedOnState bool `xml:"loggedOnState" json:"loggedOnState"`
+		ReadyState    bool `xml:"readyState" json:"readyState"`
+	}
+	// SetAgentState command sets a logged state for specified Agent roles.
+	SetAgentState struct {
+		XMLName        xml.Name `xml:"SetAgentState" json:"-"`
+		Device         string   `xml:"device" json:"device"`
+		State          string   `xml:"requestedAgentState" json:"state"`
+		AgentID        mx.JID   `xml:"agentID" json:"agent,string"`
+		Password       string   `xml:"password" json:"password"`
+		PhysicalDevice string   `xml:"physicalDevice" json:"physicalDevice"`
+	}
 )
 
 // CallingDevice описывает идентификатор устройства, который специальным

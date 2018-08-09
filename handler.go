@@ -214,6 +214,12 @@ func (l *Conns) Commands(c *rest.Context) error {
 	case "snapshotDevice":
 		cmd = new(SnapshotDevice)
 		resp = new(NamedResponse)
+	case "setAgentState":
+		cmd = new(SetAgentState)
+		resp = new(NamedResponse)
+	case "getAgentState":
+		cmd = new(GetAgentState)
+		resp = new(GetAgentStateResponse)
 
 	default:
 		return c.Error(http.StatusNotFound,
