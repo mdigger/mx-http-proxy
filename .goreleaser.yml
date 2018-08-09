@@ -6,7 +6,7 @@ builds:
   goarch:
     - amd64 # только 64-битные бинарники
 changelog:
-  sort: asc
+  # sort: asc
   filters:
     exclude:
     - '^doc:'
@@ -16,6 +16,10 @@ git:
   short_hash: true 
 release:
   draft: true
+dockers:
+  - image: mdigger/mx-http-proxy
+    latest: true
+    skip_push: true
 # Additional files/globs you want to add to the archive.
 # Defaults are any files matching `LICENCE*`, `LICENSE*`,
 # `README*` and `CHANGELOG*` (case-insensitive).
