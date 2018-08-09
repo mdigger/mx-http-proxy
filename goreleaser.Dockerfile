@@ -11,6 +11,6 @@ org.label-schema.schema-version="1.0"
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY mx-http-proxy /
 ENV PORT="8000" MX="" LOG=""
-EXPOSE ${PORT} 80 443
+EXPOSE ${PORT}
 VOLUME ["/letsEncrypt.cache", "/certs"]
 ENTRYPOINT ["/mx-http-proxy"]

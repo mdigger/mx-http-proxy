@@ -39,7 +39,7 @@ org.label-schema.schema-version="1.0"
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/bin/mx-http-proxy /
 ENV PORT="${PORT}" MX="${MX}" LOG="${LOG}"
-EXPOSE ${PORT} 80 443
+EXPOSE ${PORT}
 VOLUME ["/letsEncrypt.cache", "/certs"]
 ENTRYPOINT ["/mx-http-proxy"]
 # CMD ["--help"]
