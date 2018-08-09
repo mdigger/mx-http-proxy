@@ -86,6 +86,8 @@ func (c *Conn) reading() {
 			obj = new(ParkedEvent)
 		case "callloginfo":
 			obj = new(CallLoginfo)
+		case "ablist": // игнорируем
+			continue
 		default:
 			log.Warn("unsupported event", "name", name)
 			continue
