@@ -15,7 +15,7 @@ changelog:
 git:
   short_hash: true 
 release:
-  draft: true
+  draft: false
 dockers:
   - image: mdigger/mx-http-proxy
     skip_push: false
