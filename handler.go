@@ -209,6 +209,11 @@ func (l *Conns) Commands(c *rest.Context) error {
 	case "getServiceList":
 		cmd = new(GetServiceList)
 		resp = new(Services)
+	case "setStatus":
+		cmd = new(SetStatus)
+	case "snapshotDevice":
+		cmd = new(SnapshotDevice)
+		resp = new(NamedResponse)
 
 	default:
 		return c.Error(http.StatusNotFound,

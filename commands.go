@@ -277,6 +277,18 @@ type (
 	Services struct {
 		Services []*ServiceInfo `xml:"Service" json:"services"`
 	}
+
+	// SetStatus command sets specified presence.
+	SetStatus struct {
+		XMLName xml.Name `xml:"presence" json:"-"`
+		Status  string   `xml:"status,attr" json:"presence"`
+	}
+	// SnapshotDevice command provides information about calls associated with a
+	// specified device.
+	SnapshotDevice struct {
+		XMLName xml.Name `xml:"SnapshotDevice" json:"-"`
+		Object  string   `xml:"snapshotObject" json:"device"`
+	}
 )
 
 // CallingDevice описывает идентификатор устройства, который специальным

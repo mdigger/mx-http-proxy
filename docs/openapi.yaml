@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  version: 0.5.0
+  version: 0.5.3
   title: MX HTTP Proxy API
   description: |
     Выполнение команд через REST API на сервере [Zultys MX](https://www.zultys.com/zultys-cloud-services/).
@@ -172,15 +172,32 @@ paths:
           $ref: '#/components/responses/204'
         default:
           $ref: '#/components/responses/error'
-
+  /setStatus:
+    post:
+      operationId: setStatus
+      tags: [Authorization]
+      description: presence
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [presence]
+              properties:
+                presence:
+                  type: string
+                  description: presence
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  
   /monitorStart:
     post:
       operationId: monitorStart
       tags: [Events]
-      description: >-
-        Запуск серверного монитора позволяет отслеживать события о звонках.
-        Так же без запущенного монитора недоступны многие операции. Например,
-        работа с голосовой почтой.
+      description: MonitorStartRequest command starts monitoring of CSTA events
       requestBody:
         description: параметры для запуска монитора
         content:
@@ -220,7 +237,7 @@ paths:
     post:
       operationId: monitorStop
       tags: [Events]
-      description: Останавливает ранее запущенный серверный монитор
+      description: MonitorStopRequest command stops monitoring of CSTA events
       requestBody:
         description: параметры для остановки монитора
         required: true
@@ -1009,7 +1026,9 @@ paths:
     post:
       operationId: makeCall
       tags: [Calls]
-      description: Запускает дозвон на указанный номер или устройство
+      description: >-
+        MakeCall command allows setting up a call between a calling device and a
+        called device.
       requestBody:
         description: параметры звонка
         required: true
@@ -1059,7 +1078,7 @@ paths:
     post:
       operationId: clearConnection
       tags: [Calls]
-      description: Отменяет или завершает звонок
+      description: ClearConnection command releases all devices from an existing call.
       requestBody:
         description: параметры звонка
         required: true
@@ -1084,7 +1103,7 @@ paths:
     post:
       operationId: answerCall
       tags: [Calls]
-      description: Принимает входящий звонок
+      description: AnswerCall command answers the inbound call.
       requestBody:
         description: параметры звонка
         required: true
@@ -1109,7 +1128,7 @@ paths:
     post:
       operationId: holdCall
       tags: [Calls]
-      description: Временно ставит звонок на паузу
+      description: HoldCall command places a connected connection on hold at the same device.
       requestBody:
         description: параметры звонка
         required: true
@@ -1134,7 +1153,9 @@ paths:
     post:
       operationId: parkCall
       tags: [Calls]
-      description: Откладывает текущий звонок для дальнейшей передачи его на другое устройство
+      description: >-
+        ParkCall command moves a specified call at a device to a specified
+        (parked-to) destination.
       requestBody:
         description: параметры звонка
         required: true
@@ -1159,7 +1180,7 @@ paths:
     post:
       operationId: retriveCall
       tags: [Calls]
-      description: Восстанавливает отложенный или поставленный на паузу звонок
+      description: RetrieveCall command connects a specified held/parked connection.
       requestBody:
         description: параметры звонка
         required: true
@@ -1184,7 +1205,9 @@ paths:
     post:
       operationId: singleStepTranferCall
       tags: [Calls]
-      description: Перенаправляет звонок на другое устройство
+      description: >-
+        SingleStepTransferCall command transfers an existing connection at a
+        device to another device.
       requestBody:
         description: параметры звонка
         required: true
@@ -1213,7 +1236,7 @@ paths:
     post:
       operationId: deflectCall
       tags: [Calls]
-      description: Перенаправляет звонок на другой номер или устройство
+      description: DeflectCall command allows a call to be diverted to one or more destinations. 
       requestBody:
         description: параметры звонка
         required: true
@@ -1411,6 +1434,28 @@ paths:
                 call:
                   id: 18
                   device: '203'
+      responses:
+        '204':
+          $ref: '#/components/responses/204'
+        default:
+          $ref: '#/components/responses/error'
+  /snapshotDevice:
+    post:
+      operationId: snapshotDevice
+      tags: [Calls]
+      description: |
+        SnapshotDevice command provides information about calls associated with a
+        specified device.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [presence]
+              properties:
+                device:
+                  type: string
+                  description: device
       responses:
         '204':
           $ref: '#/components/responses/204'
