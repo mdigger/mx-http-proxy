@@ -6,4 +6,4 @@ import (
 	"net/http"
 )
 
-var assets http.FileSystem = http.Dir("www")
+var assets http.FileSystem = http.Dir("docs")
