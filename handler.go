@@ -33,6 +33,7 @@ func (l *Conns) Close() {
 func (l *Conns) Delete(token string) {
 	log.Debug("delete connection", "token", token)
 	l.list.Delete(token)
+	staistic.Connects.Add(-1)
 }
 
 const tokenSize = 12 // задает размер токена
@@ -48,6 +49,7 @@ func (l *Conns) Store(conn *Conn) string {
 	var token = base64.RawURLEncoding.EncodeToString(b)
 	log.Debug("store connection", "login", conn.login.UserName, "token", token)
 	l.list.Store(token, conn) // сохраняем соединение в списке
+	staistic.Connects.Add(1)  // увеличиваем счетчик подключений
 	// при закрытии соединения автоматически удалить из списка
 	conn.SetCloser(func(err error) {
 		if err != nil {
@@ -135,7 +137,8 @@ func (l *Conns) Commands(c *rest.Context) error {
 	}
 	// формируем команду для сервера MX и структуру для разбора ответа
 	var cmd, resp interface{}
-	switch methodName := c.Param("cmd"); methodName {
+	var methodName = c.Param("cmd")
+	switch methodName {
 	case "monitorStart":
 		cmd = new(MonitorStartRequest)
 		resp = new(MonitorStartResponse)
@@ -225,6 +228,8 @@ func (l *Conns) Commands(c *rest.Context) error {
 		return c.Error(http.StatusNotFound,
 			fmt.Sprintf("Unsupported command %q", methodName))
 	}
+
+	staistic.Commands.Add(methodName, 1) // увеличиваем счетчик команд
 
 	// разбираем параметры и формируем команду
 	if err := jsonBind(c.Request, cmd); err != nil {
@@ -349,7 +354,9 @@ func (l *Conns) Events(c *rest.Context) error {
 	log.Debug("sse connect",
 		"user", conn.login.UserName,
 		"count", conn.sse.Connected()+1)
+	staistic.SSE.Add(1)
 	conn.sse.ServeHTTP(c.Response, c.Request)
+	staistic.SSE.Add(-1)
 	log.Debug("sse disconnect",
 		"user", conn.login.UserName,
 		"count", conn.sse.Connected())

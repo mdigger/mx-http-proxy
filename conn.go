@@ -92,6 +92,8 @@ func (c *Conn) reading() {
 			log.Warn("unsupported event", "name", name)
 			continue
 		}
+
+		staistic.Events.Add(name, 1)
 		// разбираем XML с описанием события
 		if err := event.Decode(obj); err != nil {
 			log.Error("decode event error", err)
