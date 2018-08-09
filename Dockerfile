@@ -14,11 +14,11 @@ RUN ["apk", "--no-cache", "add", "git"]
 WORKDIR /go/src/github.com/mdigger/mx-http-proxy
 COPY . .
 RUN ["go", "get", "-d", "github.com/shurcooL/vfsgen", \
-"github.com/shurcooL/httpfs/filter", "./..."]
+"github.com/shurcooL/httpfs/filter", "."]
 RUN ["go", "generate"]
 ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64
 ENV ldflags="-w -s -X main.version=${version} -X main.commit=${commit} -X main.date=${date}"
-RUN go install -i -ldflags "${ldflags}" -a -installsuffix cgo ./...
+RUN go install -i -ldflags "${ldflags}" -a -installsuffix cgo
 
 FROM scratch
 ARG version
