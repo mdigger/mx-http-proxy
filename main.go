@@ -117,6 +117,7 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 		ErrorLog:          httplogger.StdLog(log.ERROR),
 	}
+	var hosts []string
 	// настраиваем автоматическое получение сертификата
 	if *letsencrypt != "" {
 		if *letsencrypt == "localhost" || net.ParseIP(*letsencrypt) != nil {
@@ -124,16 +125,16 @@ func main() {
 				fmt.Errorf("bad host name: %s", *letsencrypt))
 			os.Exit(2)
 		}
+		hosts = strings.Split(*letsencrypt, ",")
 		// добавляем заголовок с обязательством использования защищенного
 		// соединения в ближайший час
 		mux.Headers["Strict-Transport-Security"] = "max-age=3600"
 		// настраиваем поддержку TLS для сервера
 		var manager = autocert.Manager{
-			Prompt: autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist(
-				strings.Split(*letsencrypt, ",")...),
-			Email: "dmitrys@xyzrd.com",
-			Cache: autocert.DirCache("letsEncrypt.cache"),
+			Prompt:     autocert.AcceptTOS,
+			HostPolicy: autocert.HostWhitelist(hosts...),
+			Email:      "dmitrys@xyzrd.com",
+			Cache:      autocert.DirCache("letsEncrypt.cache"),
 		}
 		server.TLSConfig = &tls.Config{
 			MinVersion: tls.VersionTLS12,
@@ -144,52 +145,33 @@ func main() {
 		server.Addr = ":https" // подменяем порт на 443
 		// поддержка получения сертификата Let's Encrypt и редирект на HTTPS
 		go http.ListenAndServe(":http", manager.HTTPHandler(nil))
-		httplogger.Info("server with let'encrypt autocert",
-			"listen", []string{":80", ":443"},
-			"tls", true,
-			"host", *letsencrypt,
-		)
 	} else {
 		// проверяем, что есть локальные сертификаты и загружаем их
 		keys, err := filepath.Glob(filepath.Join(".", "certs", "*.key"))
 		if err != nil {
 			panic(err)
 		}
-		// если есть сертификаты, то добавляем их
-		if len(keys) > 0 {
-			keys, err := filepath.Glob(filepath.Join(".", "certs", "*.key"))
+		var certificates = make([]tls.Certificate, 0, len(keys))
+		// перебираем все найденные файлы
+		for _, keyfile := range keys {
+			// загружаем пару файлов с сертификатами
+			cert, err := tls.LoadX509KeyPair(keyfile[:len(keyfile)-3]+"crt", keyfile)
 			if err != nil {
-				panic(err) // ошибка может возникнуть только при ошибку в шаблоне
+				continue
 			}
-			var certificates = make([]tls.Certificate, 0, len(keys))
-			// перебираем все найденные файлы
-			for _, keyfile := range keys {
-				// загружаем пару файлов с сертификатами
-				cert, err := tls.LoadX509KeyPair(keyfile[:len(keyfile)-3]+"crt", keyfile)
-				if err != nil {
-					continue
-				}
-				certificates = append(certificates, cert)
-			}
+			certificates = append(certificates, cert)
+		}
+		if len(certificates) > 0 {
 			var tlsConfig = &tls.Config{Certificates: certificates}
 			tlsConfig.BuildNameToCertificate()
-			var hosts = make([]string, 0, len(tlsConfig.NameToCertificate))
+			hosts = make([]string, 0, len(tlsConfig.NameToCertificate))
 			for name := range tlsConfig.NameToCertificate {
 				hosts = append(hosts, name)
 			}
-			server.TLSConfig = tlsConfig // используем сертификаты
-			httplogger.Info("server with tls certificate",
-				"listen", server.Addr,
-				"tls", true,
-				"hosts", hosts,
-			)
-		} else {
-			httplogger.Info("server",
-				"listen", server.Addr,
-				"tls", false,
-			)
+			server.TLSConfig = tlsConfig
 		}
 	}
+
 	// отслеживаем сигнал о прерывании и останавливаем по нему сервер
 	go func() {
 		var sigint = make(chan os.Signal, 1)
@@ -199,6 +181,13 @@ func main() {
 			httplogger.Error("server shutdown", err)
 		}
 	}()
+	// выводим в лог информацию о запущенном сервере
+	httplogger.Info("server",
+		"listen", server.Addr,
+		"tls", server.TLSConfig != nil,
+		"hosts", hosts,
+		"letsencrypt", *letsencrypt != "",
+	)
 	// в зависимости от того, поддерживаются сертификаты или нет, запускается
 	// разная версию веб-сервера
 	var err error
