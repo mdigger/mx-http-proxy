@@ -52,7 +52,7 @@ func main() {
 		os.Exit(2)
 	}
 	mxlogger.Info("using mx server", "host", mxhost)
-	staistic.MXHost.Set(mxhost)
+	expvar.NewString("mxhost").Set(mxhost)
 	var conns = new(Conns) // инициализируем список подключений к MX
 	defer conns.Close()    // закрываем все соединения по окончании
 
@@ -143,16 +143,10 @@ func main() {
 		}
 	}()
 	// добавляем в статистику и выводим в лог информацию о запущенном сервере
-	staistic.Hosts.Set(strings.Join(hosts, ", "))
 	if server.TLSConfig != nil {
 		// добавляем заголовок с обязательством использования защищенного
 		// соединения в ближайший час
 		mux.Headers["Strict-Transport-Security"] = "max-age=3600"
-		if *letsencrypt != "" {
-			staistic.TLS.Set("letsencrypt")
-		} else {
-			staistic.TLS.Set("certificates")
-		}
 	}
 	httplogger.Info("server",
 		"listen", server.Addr,

@@ -1,7 +1,9 @@
 package app
 
 import (
+	"expvar"
 	"fmt"
+	"runtime"
 	"strings"
 	"time"
 
@@ -22,6 +24,19 @@ var info = Info{
 	Name:    "TEST-APP",
 	Version: "1.0",
 	Started: time.Now().UTC(),
+}
+
+// инициализируем отдачу информации о версии в expvar
+func init() {
+	expvar.Publish("app", expvar.Func(func() interface{} {
+		return info
+	}))
+	expvar.Publish("uptime", expvar.Func(func() interface{} {
+		return int64(time.Since(info.Started))
+	}))
+	expvar.Publish("Goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
 }
 
 // Agent задает строку, которая может использоваться в качестве имени агента
