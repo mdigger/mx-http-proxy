@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /$
+Allow: /index.html
+Allow: /openapi.yaml
+Disallow: /
