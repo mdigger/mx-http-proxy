@@ -3,51 +3,46 @@
 package main
 
 import (
-	"bufio"
 	"context"
-	"crypto/tls"
 	"expvar"
 	"flag"
-	"fmt"
 	"io/ioutil"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
-	"os/user"
 	"path/filepath"
 	"regexp"
-	"strconv"
 	"strings"
 	"time"
 
+	"github.com/mdigger/mx-http-proxy/app"
 	"github.com/mdigger/mx-http-proxy/mx"
 
 	"github.com/mdigger/log"
 	"github.com/mdigger/rest"
-	"golang.org/x/crypto/acme/autocert"
 )
 
 var (
-	mxhost = env("MX", "") // адрес сервера MX
-)
+	appName = "MX-HTTP-Proxy"
+	version string // версия приложения
+	commit  string // идентификатор коммита git
+	date    string // дата сборки
 
-func env(name, def string) string {
-	if s, ok := os.LookupEnv(name); ok {
-		return s
-	}
-	return def
-}
+	mxhost = app.Env("MX", "") // адрес сервера MX
+)
 
 func main() {
 	// разбираем параметры сервиса
 	flag.StringVar(&mxhost, "mx", mxhost, "mx server `host`")
-	var httphost = flag.String("port", env("PORT", ":8000"),
+	var httphost = flag.String("port", app.Env("PORT", ":8000"),
 		"http server `port`")
-	var letsencrypt = flag.String("letsencrypt", env("LETSENCRYPT_HOST", ""),
+	var letsencrypt = flag.String("letsencrypt", app.Env("LETSENCRYPT_HOST", ""),
 		"domain `host` name")
 	flag.Parse()
-	log.Info("service", logInfo) // выводим в лог информацию о версии сервиса
+
+	// выводим в лог информацию о версии сервиса
+	app.Parse(appName, version, commit, date)
+	log.Info("service", app.LogInfo())
 
 	var mxlogger = log.New("mx")
 	mx.Logger = mxlogger.StdLog(log.TRACE) // настраиваем вывод лога MX
@@ -61,22 +56,17 @@ func main() {
 	var conns = new(Conns) // инициализируем список подключений к MX
 	defer conns.Close()    // закрываем все соединения по окончании
 
-	// разбираем имя хоста
-	if port, err := strconv.ParseInt(*httphost, 10, 16); err == nil && port > 0 {
-		*httphost = ":" + *httphost // указан только порт
-	} else if _, _, err := net.SplitHostPort(*httphost); err != nil {
-		if err, ok := err.(*net.AddrError); ok && err.Err == "missing port in address" {
-			*httphost = net.JoinHostPort(strings.Trim(err.Addr, "[]"), "80")
-		} else {
-			log.Error("http host parse error", err)
-			os.Exit(2)
-		}
+	// разбираем имя хоста и порт, на котором будет слушать веб-сервер
+	port, err := app.Port(*httphost)
+	if err != nil {
+		log.Error("http host parse error", err)
+		os.Exit(2)
 	}
 	// инициализируем обработку HTTP запросов
 	var httplogger = log.New("http")
 	var mux = &rest.ServeMux{
 		Headers: map[string]string{
-			"Server":                      appAgent,
+			"Server":                      app.Agent,
 			"Access-Control-Allow-Origin": "*",
 		},
 		Logger: httplogger,
@@ -116,7 +106,7 @@ func main() {
 
 	// инициализируем и запускаем сервер HTTP
 	var server = http.Server{
-		Addr:              *httphost,
+		Addr:              port,
 		Handler:           mux,
 		IdleTimeout:       10 * time.Minute,
 		ReadHeaderTimeout: 5 * time.Second,
@@ -125,52 +115,21 @@ func main() {
 	var hosts []string
 	// настраиваем автоматическое получение сертификата
 	if *letsencrypt != "" {
-		if *letsencrypt == "localhost" || net.ParseIP(*letsencrypt) != nil {
-			httplogger.Error("let's encrypt host",
-				fmt.Errorf("bad host name: %s", *letsencrypt))
+		hosts = strings.Split(*letsencrypt, ",")
+		server.TLSConfig = app.LetsEncrypt(hosts...)
+		server.Addr = ":443" // подменяем порт на 443
+	} else {
+		tlsConfig, err := app.LoadCertificates(filepath.Join(".", "certs"))
+		if err != nil {
+			httplogger.Error("certificates error", err)
 			os.Exit(2)
 		}
-		hosts = strings.Split(*letsencrypt, ",")
-		// настраиваем поддержку TLS для сервера
-		var manager = autocert.Manager{
-			Prompt:     autocert.AcceptTOS,
-			HostPolicy: autocert.HostWhitelist(hosts...),
-			Email:      "dmitrys@xyzrd.com",
-			Cache:      autocert.DirCache("letsEncrypt.cache"),
-		}
-		server.TLSConfig = &tls.Config{
-			MinVersion: tls.VersionTLS12,
-			// NextProtos: []string{http2.NextProtoTLS, "http/1.1"},
-			GetCertificate: manager.GetCertificate,
-		}
-		// добавляем получение и обновление сертификатов
-		server.Addr = ":https" // подменяем порт на 443
-		// поддержка получения сертификата Let's Encrypt и редирект на HTTPS
-		go http.ListenAndServe(":http", manager.HTTPHandler(nil))
-	} else {
-		// проверяем, что есть локальные сертификаты и загружаем их
-		keys, err := filepath.Glob(filepath.Join(".", "certs", "*.key"))
-		if err != nil {
-			panic(err)
-		}
-		var certificates = make([]tls.Certificate, 0, len(keys))
-		// перебираем все найденные файлы
-		for _, keyfile := range keys {
-			// загружаем пару файлов с сертификатами
-			cert, err := tls.LoadX509KeyPair(keyfile[:len(keyfile)-3]+"crt", keyfile)
-			if err != nil {
-				continue
-			}
-			certificates = append(certificates, cert)
-		}
-		if len(certificates) > 0 {
-			var tlsConfig = &tls.Config{Certificates: certificates}
-			tlsConfig.BuildNameToCertificate()
+		if tlsConfig != nil {
+			server.TLSConfig = tlsConfig
 			hosts = make([]string, 0, len(tlsConfig.NameToCertificate))
 			for name := range tlsConfig.NameToCertificate {
 				hosts = append(hosts, name)
 			}
-			server.TLSConfig = tlsConfig
 		}
 	}
 
@@ -203,7 +162,6 @@ func main() {
 	)
 	// в зависимости от того, поддерживаются сертификаты или нет, запускается
 	// разная версию веб-сервера
-	var err error
 	if server.TLSConfig != nil {
 		err = server.ListenAndServeTLS("", "")
 	} else {
@@ -214,72 +172,4 @@ func main() {
 	} else {
 		httplogger.Info("server stopped")
 	}
-}
-
-// печатает информацию о содержимом контейнера
-// используется для отладки
-func info() {
-	if !isDocker() {
-		return
-	}
-
-	fmt.Println("----------------------------------------------")
-
-	if val, err := os.Getwd(); err == nil {
-		fmt.Printf("pwd: %s\n", val)
-	}
-	if val, err := os.Hostname(); err == nil {
-		fmt.Printf("host: %s\n", val)
-	}
-	if val, err := user.Current(); err == nil {
-		fmt.Printf("user: %v\n", val)
-	}
-
-	fmt.Println("environment:")
-	for _, env := range os.Environ() {
-		fmt.Printf("- %s\n", env)
-	}
-
-	readFile("/etc/ssl/certs/ca-certificates.crt")
-	// readFile("/etc/passwd")
-
-	fmt.Println("files:")
-	if err := filepath.Walk("/",
-		func(path string, info os.FileInfo, err error) error {
-			if err != nil {
-				fmt.Printf("error: %v\n", err)
-				return nil
-			}
-			if info.IsDir() {
-				if name := info.Name(); name == "proc" || name == "sys" {
-					return filepath.SkipDir
-				}
-			}
-			fmt.Printf("- [%[2]v]\t%[1]s\n", path, info.Mode())
-			return nil
-		}); err != nil {
-		fmt.Println("error:", err)
-	}
-	fmt.Println("----------------------------------------------")
-}
-
-func readFile(name string) error {
-	file, err := os.Open(name)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-	fmt.Printf("%s:\n", name)
-	var r = bufio.NewReader(file)
-	for {
-		str, err := r.ReadString('\n')
-		if str != "" {
-			fmt.Print("- ", str)
-		}
-		if err != nil {
-			fmt.Println()
-			break
-		}
-	}
-	return nil
 }

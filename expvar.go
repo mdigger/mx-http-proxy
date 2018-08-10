@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"runtime"
 	"strings"
-	"time"
+
+	"github.com/mdigger/mx-http-proxy/app"
 )
 
 // Statistic описывает данные для мониторинга статистики сервиса.
@@ -31,10 +32,10 @@ func (s *Statistic) String() string {
 	fmt.Fprintf(&buf, "\"tls\":%s,", s.TLS.String())
 	fmt.Fprintf(&buf, "\"sse\":%s", s.SSE.String())
 	buf.WriteString(`},"info":{`)
-	for _, info := range logInfo {
+	for _, info := range app.LogInfo() {
 		fmt.Fprintf(&buf, "%q:%q,", info.Name, info.Value)
 	}
-	fmt.Fprintf(&buf, "\"uptime\":%q", time.Since(startTime))
+	fmt.Fprintf(&buf, "\"uptime\":%q", app.Uptime())
 	buf.WriteString(`}}`)
 	return buf.String()
 }
