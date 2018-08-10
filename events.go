@@ -63,14 +63,14 @@ type (
 	// DivertedEvent indicates that a call has been diverted from a
 	// device and that the call is no longer present at the device.
 	DivertedEvent struct {
-		XMLName           xml.Name       `xml:"DivertedEvent" json:"-"`
-		MonitorCrossRefID int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call              CallWithGlobal `xml:"connection" json:"call"`
-		DivertingDevice   string         `xml:"divertingDevice>deviceIdentifier" json:"diverting"`
-		NewDestination    string         `xml:"newDestination>deviceIdentifier" json:"to"`
-		Cause             string         `xml:"cause" json:"cause"`
-		CmdsAllowed       int            `xml:"cmdsAllowed" json:"allowed,omitempty"`
-		CallTypeFlags     int            `xml:"callTypeFlags" json:"flags,omitempty"`
+		XMLName           xml.Name `xml:"DivertedEvent" json:"-"`
+		MonitorCrossRefID int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call              Call     `xml:"connection" json:"call"`
+		DivertingDevice   string   `xml:"divertingDevice>deviceIdentifier" json:"diverting"`
+		NewDestination    string   `xml:"newDestination>deviceIdentifier" json:"to"`
+		Cause             string   `xml:"cause" json:"cause"`
+		CmdsAllowed       int      `xml:"cmdsAllowed" json:"allowed,omitempty"`
+		CallTypeFlags     int      `xml:"callTypeFlags" json:"flags,omitempty"`
 	}
 	// Cad описывает формат данных с дополнительной информацией о звонке.
 	Cad struct {
@@ -117,101 +117,101 @@ type (
 	}
 	// HeldEvent indicates that a call has been placed on hold.
 	HeldEvent struct {
-		XMLName             xml.Name       `xml:"HeldEvent" json:"-"`
-		MonitorCrossRefID   int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call                CallWithGlobal `xml:"heldConnection" json:"call"`
-		HoldingDevice       string         `xml:"holdingDevice>deviceIdentifier" json:"holding"`
-		LocalConnectionInfo string         `xml:"localConnectionInfo" json:"localConnection"`
-		Cause               string         `xml:"cause" json:"cause"`
-		CmdsAllowed         int            `xml:"cmdsAllowed" json:"allowed,omitempty"`
-		CallTypeFlags       int            `xml:"callTypeFlags" json:"flags,omitempty"`
+		XMLName             xml.Name `xml:"HeldEvent" json:"-"`
+		MonitorCrossRefID   int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call                Call     `xml:"heldConnection" json:"call"`
+		HoldingDevice       string   `xml:"holdingDevice>deviceIdentifier" json:"holding"`
+		LocalConnectionInfo string   `xml:"localConnectionInfo" json:"localConnection"`
+		Cause               string   `xml:"cause" json:"cause"`
+		CmdsAllowed         int      `xml:"cmdsAllowed" json:"allowed,omitempty"`
+		CallTypeFlags       int      `xml:"callTypeFlags" json:"flags,omitempty"`
 	}
 	// RecordingStateEvent описывает событие о записи звонка.
 	RecordingStateEvent struct {
-		XMLName           xml.Name       `xml:"RecordingStateEvent" json:"-"`
-		MonitorCrossRefID int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call              CallWithGlobal `xml:"connection" json:"call"`
-		Available         bool           `xml:"RecIsAvailable" json:"available"`
-		Active            bool           `xml:"RecIsActive" json:"active"`
+		XMLName           xml.Name `xml:"RecordingStateEvent" json:"-"`
+		MonitorCrossRefID int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call              Call     `xml:"connection" json:"call"`
+		Available         bool     `xml:"RecIsAvailable" json:"available"`
+		Active            bool     `xml:"RecIsActive" json:"active"`
 	}
 	// ServiceInitiatedEvent indicates that a telephony service has been
 	// initiated at a monitored device.
 	ServiceInitiatedEvent struct {
-		XMLName             xml.Name       `xml:"ServiceInitiatedEvent" json:"-"`
-		MonitorCrossRefID   int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call                CallWithGlobal `xml:"initiatedConnection" json:"call"`
-		InitiatingDevice    string         `xml:"initiatingDevice>deviceIdentifier" json:"initiating"`
-		LocalConnectionInfo string         `xml:"localConnectionInfo" json:"localConnection"`
-		Cause               string         `xml:"cause" json:"cause"`
+		XMLName             xml.Name `xml:"ServiceInitiatedEvent" json:"-"`
+		MonitorCrossRefID   int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call                Call     `xml:"initiatedConnection" json:"call"`
+		InitiatingDevice    string   `xml:"initiatingDevice>deviceIdentifier" json:"initiating"`
+		LocalConnectionInfo string   `xml:"localConnectionInfo" json:"localConnection"`
+		Cause               string   `xml:"cause" json:"cause"`
 	}
 	// ConnectionClearedEvent indicates that a call has been cleared and no
 	// longer exists.
 	ConnectionClearedEvent struct {
-		XMLName           xml.Name       `xml:"ConnectionClearedEvent" json:"-"`
-		MonitorCrossRefID int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call              CallWithGlobal `xml:"droppedConnection" json:"call"`
-		ReleasingDevice   string         `xml:"releasingDevice>deviceIdentifier" json:"releasing"`
-		Cause             string         `xml:"cause" json:"cause"`
+		XMLName           xml.Name `xml:"ConnectionClearedEvent" json:"-"`
+		MonitorCrossRefID int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call              Call     `xml:"droppedConnection" json:"call"`
+		ReleasingDevice   string   `xml:"releasingDevice>deviceIdentifier" json:"releasing"`
+		Cause             string   `xml:"cause" json:"cause"`
 	}
 	// OriginatedEvent indicates that a call is being attempted
 	// from a device.
 	OriginatedEvent struct {
-		XMLName             xml.Name       `xml:"OriginatedEvent" json:"-"`
-		MonitorCrossRefID   int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call                CallWithGlobal `xml:"originatedConnection" json:"call"`
-		CallingDevice       string         `xml:"callingDevice>deviceIdentifier" json:"calling"`
-		CalledDevice        string         `xml:"calledDevice>deviceIdentifier" json:"called"`
-		LocalConnectionInfo string         `xml:"localConnectionInfo" json:"localConnection"`
-		Cause               string         `xml:"cause" json:"cause"`
-		CmdsAllowed         int            `xml:"cmdsAllowed" json:"allowed,omitempty"`
-		CallTypeFlags       int            `xml:"callTypeFlags" json:"flags,omitempty"`
+		XMLName             xml.Name `xml:"OriginatedEvent" json:"-"`
+		MonitorCrossRefID   int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call                Call     `xml:"originatedConnection" json:"call"`
+		CallingDevice       string   `xml:"callingDevice>deviceIdentifier" json:"calling"`
+		CalledDevice        string   `xml:"calledDevice>deviceIdentifier" json:"called"`
+		LocalConnectionInfo string   `xml:"localConnectionInfo" json:"localConnection"`
+		Cause               string   `xml:"cause" json:"cause"`
+		CmdsAllowed         int      `xml:"cmdsAllowed" json:"allowed,omitempty"`
+		CallTypeFlags       int      `xml:"callTypeFlags" json:"flags,omitempty"`
 	}
 	// NetworkReachedEvent indicates that a call has cut
 	// through the switching sub-domain boundary to another network.
 	NetworkReachedEvent struct {
-		XMLName              xml.Name       `xml:"NetworkReachedEvent" json:"-"`
-		MonitorCrossRefID    int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call                 CallWithGlobal `xml:"outboundConnection" json:"call"`
-		NetworkInterfaceUsed string         `xml:"networkInterfaceUsed>deviceIdentifier" json:"network"`
-		CallingDevice        string         `xml:"callingDevice>deviceIdentifier" json:"calling"`
-		CalledDevice         string         `xml:"calledDevice>deviceIdentifier" json:"called"`
-		LocalConnectionInfo  string         `xml:"localConnectionInfo" json:"localConnection"`
-		Cause                string         `xml:"cause" json:"cause"`
+		XMLName              xml.Name `xml:"NetworkReachedEvent" json:"-"`
+		MonitorCrossRefID    int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call                 Call     `xml:"outboundConnection" json:"call"`
+		NetworkInterfaceUsed string   `xml:"networkInterfaceUsed>deviceIdentifier" json:"network"`
+		CallingDevice        string   `xml:"callingDevice>deviceIdentifier" json:"calling"`
+		CalledDevice         string   `xml:"calledDevice>deviceIdentifier" json:"called"`
+		LocalConnectionInfo  string   `xml:"localConnectionInfo" json:"localConnection"`
+		Cause                string   `xml:"cause" json:"cause"`
 	}
 	// FailedEvent indicates that a call cannot be completed or a
 	// connection has entered the Failed state.
 	FailedEvent struct {
-		XMLName             xml.Name       `xml:"FailedEvent" json:"-"`
-		MonitorCrossRefID   int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call                CallWithGlobal `xml:"failedConnection" json:"call"`
-		CallingDevice       string         `xml:"callingDevice>deviceIdentifier" json:"calling"`
-		CalledDevice        string         `xml:"calledDevice>deviceIdentifier" json:"called"`
-		LocalConnectionInfo string         `xml:"localConnectionInfo" json:"localConnection"`
-		Cause               string         `xml:"cause" json:"cause"`
+		XMLName             xml.Name `xml:"FailedEvent" json:"-"`
+		MonitorCrossRefID   int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call                Call     `xml:"failedConnection" json:"call"`
+		CallingDevice       string   `xml:"callingDevice>deviceIdentifier" json:"calling"`
+		CalledDevice        string   `xml:"calledDevice>deviceIdentifier" json:"called"`
+		LocalConnectionInfo string   `xml:"localConnectionInfo" json:"localConnection"`
+		Cause               string   `xml:"cause" json:"cause"`
 	}
 	// RetrievedEvent indicates that a previously held call has been
 	// retrieved.
 	RetrievedEvent struct {
-		XMLName             xml.Name       `xml:"RetrievedEvent" json:"-"`
-		MonitorCrossRefID   int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call                CallWithGlobal `xml:"retrievedConnection" json:"call"`
-		RetrievingDevice    string         `xml:"retrievingDevice>deviceIdentifier" json:"retrieving"`
-		LocalConnectionInfo string         `xml:"localConnectionInfo" json:"localConnection"`
-		Cause               string         `xml:"cause" json:"cause"`
-		CmdsAllowed         int            `xml:"cmdsAllowed" json:"allowed,omitempty"`
-		CallTypeFlags       int            `xml:"callTypeFlags" json:"flags,omitempty"`
+		XMLName             xml.Name `xml:"RetrievedEvent" json:"-"`
+		MonitorCrossRefID   int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call                Call     `xml:"retrievedConnection" json:"call"`
+		RetrievingDevice    string   `xml:"retrievingDevice>deviceIdentifier" json:"retrieving"`
+		LocalConnectionInfo string   `xml:"localConnectionInfo" json:"localConnection"`
+		Cause               string   `xml:"cause" json:"cause"`
+		CmdsAllowed         int      `xml:"cmdsAllowed" json:"allowed,omitempty"`
+		CallTypeFlags       int      `xml:"callTypeFlags" json:"flags,omitempty"`
 	}
 	// TransferredEvent indicates that an existing call has been
 	// transferred to another device and the transferring device has
 	// been dropped from the call.
 	TransferredEvent struct {
-		XMLName             xml.Name       `xml:"TransferedEvent" json:"-"` // да, в xml название с ошибкой
-		MonitorCrossRefID   int            `xml:"monitorCrossRefID" json:"monitor"`
-		Call                CallWithGlobal `xml:"primaryOldCall" json:"call"`
-		TransferringDevice  string         `xml:"transferringDevice>deviceIdentifier" json:"transferring"`
-		TransferredToDevice string         `xml:"transferredToDevice>deviceIdentifier" json:"to"`
-		LocalConnectionInfo string         `xml:"localConnectionInfo" json:"localConnection"`
-		Cause               string         `xml:"cause" json:"cause"`
+		XMLName             xml.Name `xml:"TransferedEvent" json:"-"` // да, в xml название с ошибкой
+		MonitorCrossRefID   int      `xml:"monitorCrossRefID" json:"monitor"`
+		Call                Call     `xml:"primaryOldCall" json:"call"`
+		TransferringDevice  string   `xml:"transferringDevice>deviceIdentifier" json:"transferring"`
+		TransferredToDevice string   `xml:"transferredToDevice>deviceIdentifier" json:"to"`
+		LocalConnectionInfo string   `xml:"localConnectionInfo" json:"localConnection"`
+		Cause               string   `xml:"cause" json:"cause"`
 	}
 	// ParkedEvent описывает событие о парковке звонка.
 	ParkedEvent struct {

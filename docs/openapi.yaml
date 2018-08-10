@@ -463,7 +463,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       diverting:
                         type: string
                         description: divertingDevice>deviceIdentifier
@@ -638,7 +638,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       holding:
                         type: string
                         description: holdingDevice>deviceIdentifier
@@ -675,7 +675,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       available:
                         type: boolean
                         description: RecIsAvailable
@@ -701,7 +701,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       initiating:
                         type: string
                         description: initiatingDevice>deviceIdentifier
@@ -731,7 +731,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       releasing:
                         type: string
                         description: releasingDevice>deviceIdentifier
@@ -757,7 +757,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       calling:
                         type: string
                         description: callingDevice>deviceIdentifier
@@ -799,7 +799,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       network:
                         type: string
                         description: networkInterfaceUsed>deviceIdentifier
@@ -836,7 +836,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       calling:
                         type: string
                         description: callingDevice>deviceIdentifier
@@ -870,7 +870,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       retrieving:
                         type: string
                         description: retrievingDevice>deviceIdentifier
@@ -910,7 +910,7 @@ paths:
                         format: int32
                         description: monitorCrossRefID
                       call:
-                        $ref: '#/components/schemas/callInfo'
+                        $ref: '#/components/schemas/call'
                       transferring:
                         type: string
                         description: transferringDevice>deviceIdentifier
