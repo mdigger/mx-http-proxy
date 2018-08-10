@@ -3,7 +3,9 @@ package main
 import (
 	"expvar"
 	"fmt"
+	"runtime"
 	"strings"
+	"time"
 )
 
 // Statistic описывает данные для мониторинга статистики сервиса.
@@ -29,15 +31,10 @@ func (s *Statistic) String() string {
 	fmt.Fprintf(&buf, "\"tls\":%s,", s.TLS.String())
 	fmt.Fprintf(&buf, "\"sse\":%s", s.SSE.String())
 	buf.WriteString(`},"info":{`)
-	var first = true
 	for _, info := range logInfo {
-		if !first {
-			buf.WriteRune(',')
-		} else {
-			first = false
-		}
-		fmt.Fprintf(&buf, "%q:%q", info.Name, info.Value)
+		fmt.Fprintf(&buf, "%q:%q,", info.Name, info.Value)
 	}
+	fmt.Fprintf(&buf, "\"uptime\":%q", time.Since(startTime))
 	buf.WriteString(`}}`)
 	return buf.String()
 }
@@ -53,5 +50,8 @@ var staistic = &Statistic{
 }
 
 func init() {
+	expvar.Publish("Goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
 	expvar.Publish("mx_proxy", staistic)
 }

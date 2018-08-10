@@ -20,8 +20,9 @@ var (
 	commit  string // идентификатор коммита git
 	date    string // дата сборки
 
-	appAgent string      // используется как строка с именем сервиса
-	logInfo  []log.Field // информация о приложении для вывода в лог
+	appAgent  string             // используется как строка с именем сервиса
+	logInfo   []log.Field        // информация о приложении для вывода в лог
+	startTime = time.Now().UTC() // время старта сервиса
 )
 
 func init() {
