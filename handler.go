@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/rand"
 	"encoding/base64"
-	"expvar"
 	"fmt"
 	"mime"
 	"net/http"
@@ -14,12 +13,6 @@ import (
 
 	"github.com/mdigger/log"
 	"github.com/mdigger/rest"
-)
-
-var (
-	commands   = expvar.NewMap("commands")
-	connects   = expvar.NewInt("connects")
-	ssecounter = expvar.NewInt("sse")
 )
 
 // Conns описывает список подключений к серверам MX.

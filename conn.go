@@ -2,14 +2,11 @@ package main
 
 import (
 	"encoding/json"
-	"expvar"
 
 	"github.com/mdigger/log"
 	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/sse"
 )
-
-var events = expvar.NewMap("events")
 
 // Conn описывает соединение с сервером MX.
 type Conn struct {

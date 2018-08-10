@@ -51,8 +51,9 @@ func main() {
 		mxlogger.Error("mx server unavailable", "host", mxhost, err)
 		os.Exit(2)
 	}
+
 	mxlogger.Info("using mx server", "host", mxhost)
-	expvar.NewString("mxhost").Set(mxhost)
+	mhost.Set(mxhost)
 	var conns = new(Conns) // инициализируем список подключений к MX
 	defer conns.Close()    // закрываем все соединения по окончании
 
