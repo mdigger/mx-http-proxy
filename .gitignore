@@ -4,3 +4,5 @@ assets_vfsdata.go
 dist
 mx-http-proxy.paw
 certs
+dashboard.json
+docker_debug.go
