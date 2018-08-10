@@ -17,7 +17,7 @@ type (
 		Presence string   `xml:"status,attr" json:"presence,omitempty"`
 		Note     string   `xml:"presenceNote" json:"note,omitempty"`
 	}
-	// ServerMessageEvent (messageHist и message) описывает формат сообщения .
+	// ServerMessageEvent (messageHist и message) описывает формат сообщения.
 	//
 	// FIX: в новом формате текст содержится внутри вложенного элемента text
 	// для всех типов сообщений. В старом формате текст сообщения может быть
