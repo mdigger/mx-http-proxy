@@ -1,8 +1,6 @@
 package main
 
 import (
-	"encoding/json"
-
 	"github.com/mdigger/log"
 	"github.com/mdigger/mx-http-proxy/mx"
 	"github.com/mdigger/sse"
@@ -12,7 +10,7 @@ import (
 type Conn struct {
 	*mx.Conn             // соединение с сервером MX
 	login    mx.Login    // информация для авторизации
-	sse      *sse.Broker // брокер для отсылки событий
+	sse      *sse.Server // брокер для отсылки событий
 }
 
 // Connect подключается к серверу MX и авторизует пользователя.
@@ -23,8 +21,8 @@ func Connect(host string, login *mx.Login) (*Conn, error) {
 	}
 	var mxconn = &Conn{
 		Conn:  conn,
-		login: *login,    // копируем данные о логине
-		sse:   sse.New(), // инициализируем брокера для отправики событий
+		login: *login,          // копируем данные о логине
+		sse:   new(sse.Server), // инициализируем брокера для отправики событий
 	}
 	go mxconn.reading() // запускаем обработчик входящих событий от сервера MX
 	return mxconn, nil
@@ -32,8 +30,8 @@ func Connect(host string, login *mx.Login) (*Conn, error) {
 
 // Close закрывает соедиение с сервером MX.
 func (c *Conn) Close() error {
-	c.sse.Data("close", "", "") // отправляем уведомление о закрытии соединения
-	return c.Conn.Close()       // закрываем соединение
+	c.sse.Event("", "close", nil) // отправляем уведомление о закрытии соединения
+	return c.Conn.Close()         // закрываем соединение
 }
 
 // reading ожидает события от сервера MX и передает их в виде Server-Sent Events
@@ -99,17 +97,11 @@ func (c *Conn) reading() {
 			log.Error("decode event error", err)
 			continue
 		}
-		// преобразуем данные события в формат JSON
-		if data, err := json.Marshal(obj); err == nil {
-			// отправляем информацию о событии в соответствующий обработчик
-			c.sse.Data(name, string(data), "")
-			log.Debug("sse",
-				"user", c.login.UserName,
-				"event", name,
-				"data", string(data))
-		} else {
-			log.Error("json encode event error", err)
-		}
+		// отправляем информацию о событии в соответствующий обработчик
+		c.sse.Event("", name, obj)
+		log.Debug("sse",
+			"user", c.login.UserName,
+			"event", name)
 	}
 	c.sse.Close() // закрываем по окончании
 }

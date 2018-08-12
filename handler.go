@@ -53,7 +53,7 @@ func (l *Conns) Store(conn *Conn) string {
 	// при закрытии соединения автоматически удалить из списка
 	conn.SetCloser(func(err error) {
 		if err != nil {
-			conn.sse.Data("error", err.Error(), "")
+			conn.sse.Event("", "error", err)
 		}
 		l.Delete(token)
 	})
