@@ -1,7 +1,7 @@
 APPNAME := $(shell basename ${PWD})
-DATE	:= $(shell date -u +%FT%TZ)
-GIT		:= $(shell git rev-parse --short HEAD 2>/dev/null)
-TAG		:= $(shell git describe --tag 2>/dev/null) # --abbrev=0
+DATE    := $(shell date -u +%FT%TZ)
+GIT     := $(shell git rev-parse --short HEAD 2>/dev/null)
+TAG     := $(shell git describe --tag 2>/dev/null) # --abbrev=0
 FLAGS   := -ldflags "-X main.version=$(TAG) -X main.commit=$(GIT) -X main.date=$(DATE)"
 MX      = 631hc.connector73.net
 
