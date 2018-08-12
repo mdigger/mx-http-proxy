@@ -60,9 +60,9 @@ type (
 	}
 	// Call описывает информацию о звонке.
 	Call struct {
-		CallID       int    `xml:"callID" json:"id"`
-		DeviceID     string `xml:"deviceID" json:"device"`
-		GlobalCallID mx.JID `xml:"globalCallID,omitempty" json:"global,string,omitempty"`
+		CallID   int    `xml:"callID" json:"id"`
+		DeviceID string `xml:"deviceID" json:"device"`
+		// GlobalCallID mx.JID `xml:"globalCallID,omitempty" json:"global,string,omitempty"`
 	}
 	// MakeCallResponse описывает информацию о звонке, возвращаемую сервером
 	// на команду MakeCall.
