@@ -64,15 +64,6 @@ Content-Length: 180
 **Внимание:** незащищенное соединение с сервером Zultys MX не поддерживается!
 </details>
 <details>
-<summary><code>-letsencrypt &lt;hostname></code></summary>
-
-Задает имя хоста для поддержки HTTPS. Сертификат будет автоматически получени и при необходимости обновлен с помощью сервиса [Let's Encrypt](https://letsencrypt.org). Можно указать сразу несколько имен хостов, разделив их запятыми.
-
-**Внимание:** в данном случае задание порта для HTTP-сервера будет проигнорировано, т.к. для поддержки нормальной работы получения и обновления сертификата необходимо, чтобы сервер был настроен на 80 и 443 порты.
-
- Так же может быть задано через переменную окружения `LETSENCRYPT_HOST`.
-</details>
-<details>
 <summary><code>-log &lt;params></code></summary>
 Задает настройки для вывода лога работы сервиса.
 
@@ -129,20 +120,6 @@ Content-Length: 180
     21:53:01.822540 DEBUG sse user=dmtest3 event=presence data={"presence":"Available"}
 </details>
 
-## Локальные сертификаты
-
-Если в каталоге `./certs/` найдены пары сертификатов (`cert.key` и `cert.crt`), то они будут автоматически загружены и использованы веб-сервером для поддержки HTTPS. Таких пар сертификатов может быть несколько.
-
-Это могут быть и самоподписанные сертификаты. Например, для создания сертификата для `localhost` можно воспользоваться следующей командой:
-
-    openssl req -x509 -out localhost.crt -keyout localhost.key \
-	    -newkey rsa:2048 -nodes -sha256 \
-	    -subj '/CN=localhost' -extensions EXT -config <( \
-	    printf "[dn]\nCN=localhost\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:localhost\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth")
-
-**Внимание:** в этом случае необходимо явно указывать, что используется протокол `https`:
-
-    $ curl https://localhost:8000/ -k
 
 ## Поддержка Docker
 
@@ -153,8 +130,6 @@ Content-Length: 180
         -p 8000:8000 \
         -e MX=631hc.connector73.net \
         mdigger/mx-http-proxy -log all,color
-
-Кроме описанных выше параметров, сборка в Docker может потребовать подключения хранилища для кеша сертификатов `/letsEncrypt.cache` и/или хранилища сертификатов `/certs`. В последнем случае сертификаты из каталога будут автоматически загружены и сервер будет отвечать исключительно по протоколу `https://`.
 
 ## Мониторинг
 
