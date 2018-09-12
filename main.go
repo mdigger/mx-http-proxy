@@ -10,12 +10,10 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"path/filepath"
 	"regexp"
-	"strings"
 	"time"
 
-	"github.com/mdigger/mx-http-proxy/app"
+	"github.com/mdigger/app-info"
 	"github.com/mdigger/mx-http-proxy/mx"
 
 	"github.com/mdigger/log"
@@ -36,8 +34,6 @@ func main() {
 	flag.StringVar(&mxhost, "mx", mxhost, "mx server `host`")
 	var httphost = flag.String("port", app.Env("PORT", ":8000"),
 		"http server `port`")
-	var letsencrypt = flag.String("letsencrypt", app.Env("LETSENCRYPT_HOST", ""),
-		"domain `host` name")
 	flag.Parse()
 
 	// выводим в лог информацию о версии сервиса
@@ -113,26 +109,6 @@ func main() {
 		ReadHeaderTimeout: 5 * time.Second,
 		ErrorLog:          httplogger.StdLog(log.ERROR),
 	}
-	var hosts []string
-	// настраиваем автоматическое получение сертификата
-	if *letsencrypt != "" {
-		hosts = strings.Split(*letsencrypt, ",")
-		server.TLSConfig = app.LetsEncrypt(hosts...)
-		server.Addr = ":443" // подменяем порт на 443
-	} else {
-		tlsConfig, err := app.LoadCertificates(filepath.Join(".", "certs"))
-		if err != nil {
-			httplogger.Error("certificates error", err)
-			os.Exit(2)
-		}
-		if tlsConfig != nil {
-			server.TLSConfig = tlsConfig
-			hosts = make([]string, 0, len(tlsConfig.NameToCertificate))
-			for name := range tlsConfig.NameToCertificate {
-				hosts = append(hosts, name)
-			}
-		}
-	}
 
 	// отслеживаем сигнал о прерывании и останавливаем по нему сервер
 	go func() {
@@ -152,17 +128,9 @@ func main() {
 	httplogger.Info("server",
 		"listen", server.Addr,
 		"tls", server.TLSConfig != nil,
-		"hosts", hosts,
-		"letsencrypt", *letsencrypt != "",
 	)
-	// в зависимости от того, поддерживаются сертификаты или нет, запускается
-	// разная версию веб-сервера
-	if server.TLSConfig != nil {
-		err = server.ListenAndServeTLS("", "")
-	} else {
-		err = server.ListenAndServe()
-	}
-	if err != http.ErrServerClosed {
+
+	if err = server.ListenAndServe(); err != http.ErrServerClosed {
 		httplogger.Error("server", err)
 	} else {
 		httplogger.Info("server stopped")
