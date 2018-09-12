@@ -4,7 +4,7 @@ import (
 	"encoding/base64"
 	"encoding/xml"
 
-	"github.com/mdigger/mx-http-proxy/mx"
+	"github.com/Connector73/mx-http-proxy/mx"
 )
 
 // Содержит описание поддерживаемых команд и ответов на них.

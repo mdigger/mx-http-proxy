@@ -9,7 +9,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/mdigger/mx-http-proxy/mx"
+	"github.com/Connector73/mx-http-proxy/mx"
 
 	"github.com/mdigger/log"
 	"github.com/mdigger/rest"
