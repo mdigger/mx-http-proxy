@@ -2,7 +2,7 @@
 Приложение запускается как сервис и позволяет выполнять через [REST API](https://en.wikipedia.org/wiki/Representational_state_transfer) команды на удаленном сервере [Zultys MX](https://www.zultys.com/zultys-cloud-services/). Для отслеживания событий сервера Zultys MX используется [Server-Sent Events API](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events).
 
 ## Описание API
-Сервер включает в себя [описание поддерживаемого API](docs/openapi.yaml) в виде документа в формате [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification). Так же поддерживается визуальное представление данного документа при обращении к корню сервиса.
+Сервер включает в себя [описание поддерживаемого API](docs/openapi.yaml) в виде документа в формате [OpenAPI 3.0](https://github.com/OAI/OpenAPI-Specification) ([HTML view](https://mdigger.github.io/mx-http-proxy/)). Так же поддерживается визуальное представление данного документа при обращении к корню сервиса.
 
 <details>
 <summary><strong>Пример использования API</strong></summary>
